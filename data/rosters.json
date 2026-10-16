@@ -289,6 +289,7 @@
     "Tyreek Hill": "Q",
     "Will Shipley": "IR",
     "Chris Olave": "Q",
+    "Rachaad White": "Q",
     "Jordan Mason": "IR",
     "DJ Moore": "Q",
     "Stefon Diggs": "Q",
@@ -313,7 +314,7 @@
     "me_proj": 105.2,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-16 22:02 UTC"
+    "as_of": "2026-10-16 22:17 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -570,7 +571,7 @@
      "expires": 1792262486080
     }
    ],
-   "last_synced": "2026-10-16 22:02 UTC"
+   "last_synced": "2026-10-16 22:17 UTC"
   },
   "SLOPE": {
    "name": "Slopeside",
@@ -922,6 +923,7 @@
     "Tre' Harris": "O",
     "Jadarian Price": "IR",
     "De'Zhaun Stribling": "IR",
+    "Rachaad White": "Q",
     "Deebo Samuel Sr.": "O",
     "Tank Dell": "IR",
     "Jordan Addison": "Q",
@@ -976,7 +978,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-16 22:02 UTC"
+    "as_of": "2026-10-16 22:17 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1167,10 +1169,10 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-16 22:02 UTC"
+   "last_synced": "2026-10-16 22:17 UTC"
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-16",
- "last_synced": "2026-10-16 22:02 UTC"
+ "last_synced": "2026-10-16 22:17 UTC"
 }
