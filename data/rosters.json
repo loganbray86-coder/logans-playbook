@@ -313,7 +313,7 @@
     "me_proj": 105.2,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-16 20:59 UTC"
+    "as_of": "2026-10-16 22:02 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -570,7 +570,7 @@
      "expires": 1792262486080
     }
    ],
-   "last_synced": "2026-10-16 20:59 UTC"
+   "last_synced": "2026-10-16 22:02 UTC"
   },
   "SLOPE": {
    "name": "Slopeside",
@@ -930,7 +930,6 @@
     "Stefon Diggs": "Q",
     "Will Shipley": "IR",
     "Kyle Monangai": "O",
-    "Ty Johnson": "Q",
     "Saquon Barkley": "O",
     "DK Metcalf": "Q",
     "Kenyon Sadiq": "Q",
@@ -977,7 +976,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-16 20:59 UTC"
+    "as_of": "2026-10-16 22:02 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1168,10 +1167,10 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-16 20:59 UTC"
+   "last_synced": "2026-10-16 22:02 UTC"
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-16",
- "last_synced": "2026-10-16 20:59 UTC"
+ "last_synced": "2026-10-16 22:02 UTC"
 }
