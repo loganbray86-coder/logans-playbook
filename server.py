@@ -143,6 +143,7 @@ def build():
                     k = "unranked:" + norm(n); e = players.setdefault(k, {"key": k, "name": n, "pos": "?", "unranked": True})
                     unmatched.setdefault(lid, []).append(n)
                 e.setdefault("owners", {})[lid] = tname
+                R.setdefault("resolved", {}).setdefault(lid, {}).setdefault(tname, []).append(e["key"])
     advd = cached("adv", 21600, lambda: ADV.build_adv(norm)); extra = {}
     cur = int(meta.get("weekly", {}).get("week") or 1)
     if advd:
@@ -154,7 +155,7 @@ def build():
         if sched:
             extra["sched"] = sched; extra["sos"] = ADV.sos(sched, advd["fpa"], cur)
     return {**extra, "cur_week": cur, "players": list(players.values()), "meta": meta, "rosters": R, "unmatched": unmatched,
-            "rt_as_of": rt["as_of"], "status": STATUS}
+            "rt_as_of": rt["as_of"], "status": STATUS, "built": time.time()}
 
 @app.route("/api/data")
 def api_data():
@@ -174,6 +175,36 @@ def api_scoreboard():
                         "teams": teams, "broadcast": ",".join(b for x in comp.get("broadcasts", []) for b in x.get("names", []))})
         return {"week": d.get("week", {}).get("number"), "games": out}
     return jsonify(cached("espn", 60, f) or {"games": [], "error": STATUS.get("espn")})
+
+NEWS_PATH = os.path.join(BASE, "cache", "news.json")
+def news():
+    def f():
+        import xml.etree.ElementTree as ET
+        old = json.load(open(NEWS_PATH)) if os.path.exists(NEWS_PATH) else []
+        seen = {x["id"] for x in old}
+        r = ET.fromstring(requests.get("https://www.rotowire.com/rss/news.php?sport=NFL", headers=UA, timeout=15).content)
+        for it in r.iter("item"):
+            g = it.findtext("guid")
+            if g in seen: continue
+            t = it.findtext("title") or ""
+            old.append({"id": g, "player": t.split(":")[0].strip(), "title": t, "desc": (it.findtext("description") or "").split("Visit RotoWire")[0].strip(),
+                        "link": it.findtext("link"), "date": it.findtext("pubDate"), "src": "RotoWire"})
+        old = old[-400:]; json.dump(old, open(NEWS_PATH, "w")); return old
+    return cached("news", 300, f)
+
+@app.route("/api/news")
+def api_news(): return jsonify({"items": list(reversed(news() or [])), "status": STATUS.get("news")})
+
+@app.route("/api/refresh", methods=["POST", "GET"])
+def api_refresh():
+    with _lock: _cache.clear()
+    for f in ("sleeper_slim.json", "sched.json"):
+        fp = os.path.join(BASE, "cache", f)
+        if os.path.exists(fp): os.utime(fp, (0, 0))
+    d = build()
+    with _lock: _cache["build"] = (time.time(), d)
+    news()
+    return jsonify({"ok": True, "updated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "status": STATUS})
 
 @app.route("/api/status")
 def api_status(): return jsonify(STATUS)

@@ -1,270 +1,235 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#c8102e"><link rel="manifest" href="/manifest.json"><link rel="apple-touch-icon" href="/static/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Playbook"><title>Logan's Playbook</title><style>
-:root{--bg:#0b0f17;--card:#141b27;--card2:#1b2433;--line:#263247;--tx:#e8edf5;--mut:#8b98ad;--acc:#ff3b30;--blu:#2f8cff;--grn:#30d158;--yel:#ffd60a;--org:#ff9f0a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px -apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,sans-serif;padding-bottom:80px}
-header{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,#c8102e,#7a0019);padding:10px 14px;display:flex;align-items:center;gap:10px}
-header h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.3px}header .sub{font-size:11px;opacity:.85;margin-left:auto;text-align:right}
-nav{display:flex;gap:4px;overflow-x:auto;background:#0f1520;padding:6px;border-bottom:1px solid var(--line)}
-nav button{flex:0 0 auto;background:none;border:0;color:var(--mut);padding:8px 10px;border-radius:10px;font-weight:600;cursor:pointer;font-size:13px}
-nav button.on{background:var(--card2);color:#fff}
-@media(max-width:760px){nav{position:fixed;bottom:0;left:0;right:0;border-top:1px solid var(--line);border-bottom:0;padding-bottom:calc(6px + env(safe-area-inset-bottom));z-index:9}nav button{font-size:11px;padding:6px 8px;display:flex;flex-direction:column;align-items:center}}
-nav i{font-style:normal;font-size:17px;display:block}
-main{padding:12px;max-width:1150px;margin:auto}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
-h2{font-size:16px;margin:2px 0 10px}h3{font-size:14px;margin:8px 0;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
-.pill{background:var(--card2);border:1px solid var(--line);color:var(--tx);padding:6px 10px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600}.pill.on{background:var(--blu);border-color:var(--blu)}
-input,select,textarea{background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px 10px;font-size:14px}textarea{width:100%;min-height:70px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--mut);font-size:11px;text-transform:uppercase;cursor:pointer;position:sticky;top:0;background:var(--card)}
-.tw{overflow-x:auto;max-height:70vh}.num{text-align:right}tr.mine td{background:rgba(47,140,255,.09)}
-.b{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:1px 5px;margin-left:4px;vertical-align:1px}.bW{background:var(--blu)}.bS{background:#8e44ff}
-.inj{color:var(--org);font-weight:700;font-size:11px;margin-left:4px}.injO{color:var(--acc)}
-.pos{font-size:10px;font-weight:800;padding:2px 5px;border-radius:5px;background:#33415a}.QB{background:#b03a5b}.RB{background:#1f8a5b}.WR{background:#2a6fc9}.TE{background:#c77d12}.DST{background:#555}.K{background:#6b5b95}
-.mut{color:var(--mut);font-size:12px}.good{color:var(--grn)}.bad{color:var(--acc)}.warn{color:var(--yel)}
-.big{font-size:22px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-.verdict{font-size:20px;font-weight:900;padding:10px;border-radius:12px;text-align:center}
-.game{display:flex;justify-content:space-between;align-items:center}.game img{width:26px;height:26px;vertical-align:middle;margin-right:6px}
-.chip{display:inline-block;background:var(--card2);border-radius:8px;padding:2px 6px;margin:2px;font-size:11px}
-.ac{position:relative}.pl{cursor:pointer;text-decoration:underline dotted #556}#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;overflow:auto;padding:20px 10px}#modal .card{max-width:640px;margin:auto}.gA{color:#30d158}.gB{color:#a4e05a}.gC{color:#ffd60a}.gD{color:#ff9f0a}.gF{color:#ff453a}.g{font-weight:900}.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}.btn.s{background:var(--card2)}
-
-@media(max-width:600px){header{flex-wrap:wrap;padding-top:calc(10px + env(safe-area-inset-top))}header h1{font-size:16px}nav{-webkit-overflow-scrolling:touch;scrollbar-width:none}nav button,nav a{flex:0 0 auto;min-height:36px}table{display:block;overflow-x:auto}}
+<meta name="theme-color" content="#ffffff"><link rel="manifest" href="/manifest.json"><link rel="apple-touch-icon" href="/static/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Playbook"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>Logan's Playbook</title><style>
+:root{--yl:#f2c94c;--bg:#0d1117;--card:#161c26;--card2:#1f2733;--line:#2a3442;--tx:#eef2f7;--mut:#8a96a8;--blu:#2d8cff;--grn:#2fd27a;--red:#ff4d4f;--yel:#ffc53d;--org:#ff9a3d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);color:var(--tx);font:15px -apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.96);backdrop-filter:blur(10px);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+header h1{font-size:20px;margin:0;font-weight:800}.upd{font-size:11px;color:var(--mut)}
+#rf{margin-left:auto;background:var(--blu);color:#fff;border:0;border-radius:999px;padding:9px 14px;font-weight:700;font-size:14px;display:flex;gap:6px;align-items:center}
+#rf.spin span{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:9;display:flex;background:#11161e;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;background:none;border:0;color:var(--mut);padding:8px 0 7px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabs button i{font-style:normal;font-size:21px;line-height:1}.tabs button.on{color:var(--blu)}
+main{padding:12px 14px;max-width:640px;margin:auto}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:12px}.seg button{flex:1;border:0;background:none;color:var(--mut);padding:8px 4px;border-radius:9px;font-weight:700;font-size:13px}.seg button.on{background:var(--blu);color:#fff}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--tx);padding:6px 13px;border-radius:999px;font-weight:700;font-size:13px}.chips button.on{background:#fff;color:#000}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.ttl{font-size:13px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin:16px 2px 8px}
+.pr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.pr:last-child{border:0}
+.slot{width:40px;font-size:11px;font-weight:800;color:var(--mut);text-align:center}.nm{font-weight:700}.sm{font-size:12px;color:var(--mut)}.pts{margin-left:auto;text-align:right;font-weight:800}
+.tag{font-size:10px;font-weight:800;border-radius:5px;padding:2px 5px;margin-left:5px;vertical-align:1px}.tO,.tD,.tIR{background:var(--red);color:#fff}.tQ{background:var(--yel);color:#000}.tBYE{background:#555;color:#fff}.tL{background:#334;color:#cde}
+.up{color:var(--grn)}.dn{color:var(--red)}.mut{color:var(--mut)}
+.big{width:100%;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:800;background:var(--grn);color:#04210f;margin-top:4px}.big.off{background:var(--card2);color:var(--mut)}
+.btns{display:flex;gap:8px;margin-top:12px}.btns button{flex:1;border:0;border-radius:11px;padding:11px;font-weight:800;font-size:14px}.go{background:var(--blu);color:#fff}.no{background:var(--card2);color:var(--tx)}
+.sum{display:flex;gap:10px}.sum div{flex:1;background:var(--card2);border-radius:12px;padding:10px;text-align:center}.sum b{display:block;font-size:20px}
+.mv{display:flex;align-items:center;gap:8px;margin:4px 0}.pill{font-size:11px;font-weight:800;border-radius:6px;padding:3px 7px}.add{background:rgba(47,210,122,.15);color:var(--grn)}.drp{background:rgba(255,77,79,.15);color:var(--red)}
+.why{font-size:13px;color:#c5cedb;margin-top:8px;line-height:1.45}.grd{display:flex;gap:8px;margin-top:10px}.grd div{flex:1;background:var(--card2);border-radius:10px;padding:8px;text-align:center;font-size:12px}.grd b{display:block;font-size:17px}
+input[type=search]{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px 13px;font-size:15px;margin-bottom:10px}
+.rk{width:30px;font-weight:800;color:var(--mut)}.own{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:var(--blu);color:#fff;margin-left:5px}.own.t{background:#333c4a;color:#aab}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:none;align-items:flex-end}#sheet .in{background:var(--card);width:100%;max-width:640px;margin:auto auto 0;border-radius:20px 20px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+#sheet pre{white-space:pre-wrap;background:var(--card2);border-radius:12px;padding:12px;font:600 14px/1.5 ui-monospace,Menlo,monospace}
+.note{font-size:12px;color:var(--mut);line-height:1.4}.empty{text-align:center;color:var(--mut);padding:24px}
+.nw{padding:11px 0;border-bottom:1px solid var(--line)}.nw:last-child{border:0}.nw .h{font-weight:700}.nw .d{font-size:13px;color:#c5cedb;margin-top:3px}
+#fab{position:fixed;right:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:10;background:var(--blu);color:#fff;border:0;border-radius:999px;padding:12px 16px;font-weight:800;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+#gmT{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px;font:15px -apple-system,sans-serif;resize:none}
+#hist{max-height:30vh;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}.bub{align-self:flex-end;background:var(--blu);color:#fff;border-radius:16px 16px 4px 16px;padding:8px 11px;max-width:85%;font-size:14px;white-space:pre-wrap}.bub small{display:block;opacity:.75;font-size:10px;margin-top:3px}
+.x{margin-left:auto;background:var(--card2);border:0;color:var(--tx);border-radius:999px;width:30px;height:30px}
+html.light{--bg:#fff;--card:#fff;--card2:#f3f5f9;--line:#e2e7ee;--tx:#16191d;--mut:#525a67;--blu:#0769de;--grn:#3a8a5c;--red:#d9534f;--yl:#f2c94c}
+html.light .card{box-shadow:none}html.light .tabs{box-shadow:0 2px 14px rgba(0,0,0,.08)}html.light .tabs button.on{background:#ececee}html.light .chips button.on{background:#111;color:#fff}html.light .seg{background:#f1f2f4}html.light .seg button.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+html.light .go,html.light .big{color:#111}html.light .no{background:#e8eefb;color:var(--blu)}html.light .bub{background:var(--blu)}html.light #sheet .in{background:#fff}html.light .own.t{background:#e8e9ec;color:#555}html.light .tL{background:#e8e9ec;color:#555}
+html.light header{background:rgba(255,255,255,.96)}html.light .tabs{background:#fff}html.light .why{color:#333}html.light .nw .d{color:#333}
+header{justify-content:center;position:sticky}header h1{font-style:italic;font-weight:900;text-align:center}.hl{position:absolute;left:12px;top:calc(8px + env(safe-area-inset-top))}.hr{position:absolute;right:12px;top:calc(8px + env(safe-area-inset-top));display:flex;gap:6px}
+.cb{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:17px}.cb.spin{animation:sp 1s linear infinite}
+.tabs{left:12px;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:30px;padding:4px;box-shadow:0 6px 24px rgba(0,0,0,.35)}.tabs button{border-radius:24px}.tabs button.on{background:var(--card2)}
+#fab{width:58px;height:58px;padding:0;border-radius:50%;font-size:24px;background:conic-gradient(from 200deg,#ff9a3d,#ff3d7f,#8b5cf6,#2d8cff,#ff9a3d);bottom:calc(84px + env(safe-area-inset-bottom));border:3px solid var(--bg)}
+.lgH{display:flex;justify-content:space-between;align-items:baseline;margin:14px 2px 10px}.lgH h2{margin:0;font-size:22px;font-weight:800}.lnk{color:var(--blu);font-weight:700;background:none;border:0;font-size:15px}
+.lc{padding:0;overflow:hidden}.lch{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--line)}.hel{font-size:34px}.lch .n{font-weight:800;font-size:18px}
+.mu{padding:12px 14px}.mu .tn{display:flex;justify-content:space-between;font-size:13px;font-weight:700}.mu .sc{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:6px}.mu .sc b{font-size:24px}.vs{background:var(--card2);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--mut)}
+.bar{display:flex;gap:6px;margin-top:10px}.bar div{height:6px;border-radius:3px}.sg{border-top:1px solid var(--line);padding:12px 14px}.sg summary{font-weight:700;list-style:none;display:flex;align-items:center;gap:8px}.cnt{background:var(--red);color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.big{background:var(--yl);color:#111}.go{background:var(--yl);color:#111}
+body{font-family:"Poppins",-apple-system,Arial,Helvetica,sans-serif;letter-spacing:-.1px}
+header{border-bottom:1px solid var(--line);padding-bottom:12px}header h1{font-size:20px}
+.card{border-radius:18px;border:1px solid var(--line);padding:16px}.lc{padding:0}
+.lch{padding:16px;border-bottom:1px solid var(--line)}.lch .n{font-size:19px;font-weight:800}.lch .sm{font-size:15px;font-weight:600;margin-top:2px}
+.mu{padding:14px 16px 4px}.mu .tn{font-size:14px;font-weight:700}.mu .sc b{font-size:26px;font-weight:900}.mu .sc .sm{font-size:15px;font-weight:800}
+.bar div{height:7px}.sg{padding:14px 16px}.sg summary{font-size:16px}
+.chips button{border-radius:10px;padding:8px 14px;font-weight:700}.lgH h2{font-size:22px}
+.tabs button{font-size:12px;font-weight:700;padding:9px 0 8px}.tabs button i{font-size:22px}
+.btns button,.big{border-radius:12px;font-weight:800}input[type=search]{border:0;background:var(--card2);border-radius:12px}
+html.light .pr{border-color:#ebeef4}html.light .chips button{border-color:#e2e7ee;border-radius:1.8rem}html.light .chips button.on{background:#081d3f}
 </style></head><body>
-<header><h1>🏈 LOGAN'S PLAYBOOK</h1><select id="scsel" onchange="setSc(this.value)" style="font-size:11px;padding:4px"><option value="1,4">PPR · 4pt PTD</option><option value="1,6">PPR · 6pt PTD</option><option value="0.5,4">Half · 4pt</option><option value="0.5,6">Half · 6pt</option><option value="0,4">Std · 4pt</option><option value="0,6">Std · 6pt</option></select><div class="sub" id="upd">loading…</div></header>
-<nav id="nav"></nav><main id="main"><div class="card">Loading real data from FantasyPros, FantasyCalc, RotoTrade seed, Sleeper…</div></main>
-<datalist id="names"></datalist><div id="modal" onclick="if(event.target==this)this.style.display='none'"></div>
+<header><button class="cb hl" onclick="theme()" title="Theme">◐</button><div style="text-align:center"><h1>My Playbook</h1><div class="upd" id="upd">Loading…</div></div><div class="hr"><button class="cb" id="rf" onclick="refresh()" title="Refresh">⟳</button></div></header>
+<main id="main"><div class="empty">Loading your leagues…</div></main>
+<nav class="tabs" id="tabs"></nav>
+<button id="fab" onclick="openGM('')" title="Ask GM">✦</button>
+<div id="sheet" onclick="if(event.target===this)closeSheet()"><div class="in"><div style="display:flex;align-items:center"><div style="font-weight:800;font-size:18px">Ask GM</div><button class="x" onclick="closeSheet()">✕</button></div>
+<div class="note" id="shN" style="margin:4px 0 8px"></div><div id="hist"></div>
+<div class="chips" id="qc"></div><textarea id="gmT" rows="3" placeholder="Message your GM (Grok Bot)…"></textarea>
+<div class="btns"><button class="go" onclick="sendGM()" id="cpB">Send</button></div><div class="note" id="gmS" style="margin-top:8px">No direct line to Grok Bot from the app: Send opens your share sheet (or copies) so you can paste it in your Grok Bot chat. The app never touches ESPN.</div></div></div>
 <script>
-const TABS=[["rank","📊","Rankings"],["ss","✅","Start/Sit"],["team","👕","My Team"],["wav","➕","Waivers"],["trade","🔄","Trade"],["league","🏆","Leagues"],["scores","📺","Scores"],["news","🚑","Injuries"],["stats","📈","Stats"],["sos","🗓️","SOS"],["finder","🔎","Finder"],["plan","🗺️","Planner"],["report","📋","Report"],["edge","⚡","Edge"],["vals","💲","Values"]];
-let D,P,tab=location.hash.slice(1)||"rank",S={mode:"wk",pos:"ALL",q:"",lg:"WAN",ss:["","","",""],A:[],B:[],fcT:12,vs:"fc12",vd:-1,avail:""};
-const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const L=()=>D.rosters.leagues, myTeam=lg=>L()[lg].my_team, isMine=(p,lg)=>p.owners&&p.owners[lg]===myTeam(lg);
-const fcv=(p,t)=>p[t==16?"fc16":"fc12"]; const wp=p=>p.wk&&p.wk.pts!=null?p.wk.pts:null; const ro=p=>p.ros&&p.ros.overall?p.ros.overall:9999;
-const posNum=p=>p.ros&&p.ros.pos_num?p.ros.pos_num:999;
-function badges(p){let s="";if(isMine(p,"WAN"))s+='<span class="b bW">W</span>';if(isMine(p,"SLOPE"))s+='<span class="b bS">S</span>';
- if(p.inj)s+=`<span class="inj ${/Out|IR|Doubt|Sus|PUP/.test(p.inj)?"injO":""}">${esc(p.inj[0]=="I"&&p.inj=="IR"?"IR":p.inj.slice(0,1))}</span>`;return s}
-const nm=p=>`<b class="pl" onclick="openP('${p.key}')">${esc(p.name)}</b>${badges(p)} <span class="mut">${esc(p.team||"")}</span>`;const pb=p=>`<span class="pos ${p.pos}">${p.pos}</span>`;
-const byKey=k=>P.find(p=>p.key===k); const findName=n=>P.find(p=>p.name.toLowerCase()===n.trim().toLowerCase());
-async function load(r){D=await (await fetch("/api/data"+(r?"?refresh=1":""))).json();P=D.players;
- $("#names").innerHTML=P.map(p=>`<option value="${esc(p.name)}">${p.pos} ${esc(p.team||"")}</option>`).join("");
- const st=D.status,f=k=>st[k]?(st[k].ok?st[k].fetched:"FAILED"):"–";
- $("#upd").innerHTML=`FP Wk${D.meta.weekly?.week} upd ${D.meta.weekly?.updated} · ROS ${D.meta.ros?.updated}<br>FC ${f("fc12")} · RT as of ${D.rt_as_of} · Sleeper ${f("sleeper")}`;render()}
-function nav(){$("#nav").innerHTML=TABS.map(([k,i,t])=>`<button class="${k==tab?"on":""}" onclick="go('${k}')"><i>${i}</i>${t}</button>`).join("")}
-function go(t){tab=t;location.hash=t;render();scrollTo(0,0)}
-function render(){nav();$("#main").innerHTML=({rank,ss,team,wav,trade,league,scores,news,vals,stats,sos,finder,plan,report,edge})[tab]();if(tab=="scores")loadScores()}
-function pills(key,opts,cb){return opts.map(o=>`<span class="pill ${S[key]==o[0]?"on":""}" onclick="S.${key}='${o[0]}';${cb||"render()"}">${o[1]}</span>`).join("")}
-const lgPills=()=>pills("lg",[["WAN","WAN 2027 (12)"],["SLOPE","Slopeside (16)"]]);
-/* ---------- Rankings ---------- */
-function rankList(){let l=P.filter(p=>!p.unranked);const flex=["RB","WR","TE"];
- if(S.pos=="FLEX")l=l.filter(p=>flex.includes(p.pos));else if(S.pos!="ALL")l=l.filter(p=>p.pos==S.pos);
- if(S.mode=="wk"){l=l.filter(p=>p.wk);l.sort(S.pos=="ALL"||S.pos=="FLEX"?(a,b)=>wp(b)-wp(a):(a,b)=>a.wk.rank-b.wk.rank)}
- else{l=l.filter(p=>p.ros);l.sort(S.pos=="ALL"||S.pos=="FLEX"?(a,b)=>ro(a)-ro(b)||posNum(a)-posNum(b):(a,b)=>posNum(a)-posNum(b))}
- if(S.q)l=l.filter(p=>p.name.toLowerCase().includes(S.q.toLowerCase()));return l}
-function rank(){const l=rankList(),w=S.mode=="wk";
- return `<div class="card"><div class="row">${pills("mode",[["wk","Week "+(D.meta.weekly?.week||"")],["ros","Rest of Season"]])}</div>
- <div class="row">${pills("pos",["ALL","QB","RB","WR","TE","FLEX","DST","K"].map(x=>[x,x]))}<input placeholder="Search player" value="${esc(S.q)}" oninput="S.q=this.value;document.getElementById('rt').innerHTML=rankRows()" style="flex:1;min-width:140px"></div>
- <div class="mut">${w?(S.pos=="ALL"||S.pos=="FLEX"?"Sorted by FantasyPros weekly PPR projection (no cross-position weekly ECR exists).":"FantasyPros weekly PPR ECR."):"FantasyPros ROS PPR ECR (overall rank from ros-ppr-overall)."} <span class="b bW">W</span>=WAN <span class="b bS">S</span>=Slopeside</div>
- <div class="tw"><table><thead><tr><th>#</th><th>Player</th><th>Pos</th>${w?"<th>Opp</th><th class=num>Proj</th><th>Grade</th>":"<th>Ovr</th><th>Bye</th>"}<th>Best</th><th>Worst</th><th>Avg</th><th>SD</th></tr></thead><tbody id="rt">${rankRows()}</tbody></table></div></div>`}
-function rankRows(){const w=S.mode=="wk";return rankList().slice(0,400).map((p,i)=>{const r=w?p.wk:p.ros;
- return `<tr class="${p.owners?"mine":""}"><td>${i+1}</td><td>${nm(p)}</td><td>${pb(p)} ${esc(r.pos_rank||"")}</td>${w?`<td>${esc(p.opp||"")}</td><td class=num>${wp(p)??"-"}</td><td>${esc(r.grade||"")}</td>`:`<td>${p.ros.overall||"-"}</td><td>${esc(p.bye||"")}</td>`}<td>${esc(r.best??"")}</td><td>${esc(r.worst??"")}</td><td>${esc(r.avg??"")}</td><td>${esc(r.std??"")}</td></tr>`}).join("")}
-/* ---------- Start/Sit ---------- */
-function ss(){const ps=S.ss.map(findName).filter(Boolean);ps.forEach(p=>{p._g=mg(p);p._adj=adjP(p)});const srt=ps.slice().sort((a,b)=>b._adj-a._adj),best=srt[0];
- const conf=srt.length>1&&best._adj>0?Math.min(95,Math.round(50+(best._adj-srt[1]._adj)/best._adj*150)):null;
- return `<div class="card"><h2>Start/Sit Compare</h2><div class="row">${S.ss.map((v,i)=>`<input list="names" placeholder="Player ${i+1}" value="${esc(v)}" onchange="S.ss[${i}]=this.value;render()">`).join("")}</div>
- ${ps.length>=2?`<div class="verdict" style="background:#12391f">START: ${esc(best.name)} <span class="mut">(${wp(best)??0} proj · ${conf}% confidence)</span></div><div class="grid" style="margin-top:10px">${ps.map(p=>`<div class="card" style="${p==best?"border-color:var(--grn)":""}">${pb(p)} ${nm(p)}<div class="big">${wp(p)??"BYE/–"}</div><div class="mut">Wk rank ${p.wk?.pos_rank||"–"} · ECR ${p.wk?.rank||"–"} · grade ${p.wk?.grade||"–"}</div><div>Matchup: ${esc(p.opp||"no game listed")} ${gr(p._g)} <span class="mut">adj ${p._adj.toFixed(1)}</span></div><div class="mut">Expert range ${p.wk?.best||"-"}–${p.wk?.worst||"-"}</div><div>ROS ${p.ros?.pos_rank||"–"} (ovr ${p.ros?.overall||"–"})</div>${p.inj?`<div class="bad">${esc(p.inj)} ${esc(p.inj_part||"")}</div>`:""}</div>`).join("")}</div><div class="mut">Pick = FantasyPros weekly PPR projection adjusted ±10% by matchup grade (A…F = fantasy pts allowed by opponent to the position, nflverse ${D.adv_season} thru wk ${D.adv_thru}). Confidence scales with the adjusted gap to #2.</div>`:'<div class="mut">Choose 2–4 players.</div>'}</div>`}
-/* ---------- lineup ---------- */
-const elig=(slot,p)=>slot=="FLEX"?["RB","WR","TE"].includes(p.pos):slot==p.pos;
-function roster(lg){const ir=L()[lg].ir||[];return P.filter(p=>isMine(p,lg)).map(p=>({...p,_ir:ir.includes(p.name)}))}
-function optimal(lg,score,list){list=list||roster(lg).filter(p=>!p._ir);const used=new Set(),out=[];const slots=L()[lg].slots;
- const order=slots.map((s,i)=>[s,i]).sort((a,b)=>(a[0]=="FLEX")-(b[0]=="FLEX"));const res=[];
- for(const [s,i] of order){const c=list.filter(p=>!used.has(p.key)&&elig(s,p)).sort((a,b)=>score(b)-score(a))[0];if(c)used.add(c.key);res[i]={slot:s,p:c}}
- return {lineup:res,bench:list.filter(p=>!used.has(p.key))}}
-function team(){const lg=S.lg,r=roster(lg),{lineup,bench}=optimal(lg,p=>wp(p)??-1);
- const warn=r.filter(p=>!p._ir&&(wp(p)==null||wp(p)<1)).map(p=>`<div class="warn">⚠️ ${esc(p.name)}: ${wp(p)==null?"no Week "+D.meta.weekly.week+" projection (bye or not ranked)":"projected "+wp(p)}${p.inj?" · "+esc(p.inj):""}</div>`).join("");
- const notes=lineup.map(({slot,p})=>{if(!p)return `<div class="bad">No eligible player for ${slot}</div>`;const alt=bench.filter(b=>elig(slot,b)).sort((a,b)=>(wp(b)??-1)-(wp(a)??-1))[0];
-  return `<div>✅ <b>${slot}: ${esc(p.name)}</b> (${wp(p)??0})${alt?` over ${esc(alt.name)} (${wp(alt)??"bye"}) — +${((wp(p)??0)-(wp(alt)??0)).toFixed(1)} proj pts${p.opp?", "+esc(p.opp):""}`:""}</div>`}).join("");
- const unm=(D.unmatched[lg]||[]);const tot=lineup.reduce((s,x)=>s+(x.p?wp(x.p)??0:0),0);
- return `<div class="card"><div class="row">${lgPills()}</div><h2>${esc(L()[lg].name)} · ${esc(myTeam(lg))}</h2>${L()[lg].notes?`<div class="mut">${esc(L()[lg].notes)}</div>`:""}${warn}${unm.length?`<div class="mut">Not in FP rankings: ${unm.map(esc).join(", ")}</div>`:""}</div>
- ${autopilot(lg)}${apCard(lg)}<div class="card"><h2>Start/Sit Assistant: optimal lineup <span class="mut">(${tot.toFixed(1)} proj)</span></h2>${notes}<div class="mut" style="margin-top:6px">Built from FantasyPros weekly PPR projections. Your current ESPN lineup isn't read here; compare and set changes in ESPN.</div></div>
- <div class="card"><div class="tw"><table><thead><tr><th>Slot</th><th>Player</th><th>Opp</th><th class=num>Proj</th><th>Wk</th><th>ROS</th><th>Ovr</th><th class=num>RT</th><th class=num>FC</th></tr></thead><tbody>
- ${lineup.concat(bench.map(p=>({slot:"BN",p}))).concat(r.filter(p=>p._ir).map(p=>({slot:"IR",p}))).map(({slot,p})=>p?`<tr><td><b>${slot}</b></td><td>${pb(p)} ${nm(p)}</td><td>${esc(p.opp||"BYE/–")}</td><td class=num>${wp(p)??"-"}</td><td>${p.wk?.pos_rank||"-"}</td><td>${p.ros?.pos_rank||"-"}</td><td>${p.ros?.overall||"-"}</td><td class=num>${p.rt??"-"}</td><td class=num>${fcv(p,L()[lg].teams_count)??"-"}</td></tr>`:"").join("")}</tbody></table></div></div>`}
-/* ---------- Waivers ---------- */
-function owned(p,lg){return p.owners&&p.owners[lg]}
-function wav(){const lg=S.lg,av=S.avail.split(/[\n,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
- let pool=P.filter(p=>p.ros&&!owned(p,lg));if(av.length)pool=pool.filter(p=>av.includes(p.name.toLowerCase()));const cap=lg=='SLOPE'?75:60;const likely=av.length?pool:pool.filter(p=>p.own!=null&&p.own<cap);
- if(S.pos!="ALL")pool=pool.filter(p=>S.pos=="FLEX"?["RB","WR","TE"].includes(p.pos):p.pos==S.pos);pool.sort((a,b)=>ro(a)-ro(b)||posNum(a)-posNum(b));
- const r=roster(lg).filter(p=>!p._ir),sug=[];
- for(const pos of ["QB","RB","WR","TE","DST","K"]){const mine=r.filter(p=>p.pos==pos);if(!mine.length)continue;const drop=mine.sort((a,b)=>posNum(b)-posNum(a))[0];
-  const add=likely.filter(p=>p.pos==pos).sort((a,b)=>posNum(a)-posNum(b))[0];if(add&&posNum(add)<posNum(drop))sug.push({add,drop})}
- return `<div class="card"><div class="row">${lgPills()}</div><h2>Waiver Assistant</h2><div class="warn">⚠️ ESPN availability is NOT checked. These players aren't on Logan's roster${Object.keys(L()[lg].teams).length>1?" or other listed teams":""}; they may be owned in ESPN. Without a pasted list, ADD suggestions only use players rostered in under ${lg=='SLOPE'?75:60}% of leagues (FantasyPros avg roster %) as a likely-available proxy. Paste ESPN's free-agent names below to restrict to truly available players.</div>
- <textarea placeholder="Optional: paste available player names (one per line or comma separated)" onchange="S.avail=this.value;render()">${esc(S.avail)}</textarea>
- ${sug.map(({add,drop})=>`<div class="card" style="margin:8px 0">📈 <b>ADD ${esc(add.name)}</b> ${pb(add)} · <b class="bad">DROP ${esc(drop.name)}</b><div class="mut">Why: ROS ${add.ros.pos_rank} (ovr ${add.ros.overall||"–"}) vs your lowest ${pos(drop)} ${drop.ros?.pos_rank||"unranked"}${add.wk?` · this week ${wp(add)} vs ${wp(drop)??"bye"}`:""}${add.inj?" · injury: "+esc(add.inj):""} · usage ${add.adv?add.adv.trend+" ("+add.adv.trend_val+")":"n/a"} · ROS SOS ${sosG(add,"ros")||"–"} · playoff SOS ${sosG(add,lg=="WAN"?"wan_po":"slope_po")||"–"}</div></div>`).join("")||'<div class="mut">No add beats your lowest ROS player at any position.</div>'}</div>
- <div class="card"><h2>Top ranked players not on your team</h2><div class="row">${pills("pos",["ALL","QB","RB","WR","TE","FLEX","DST","K"].map(x=>[x,x]))}</div><div class="tw"><table><thead><tr><th>Player</th><th>Pos</th><th>ROS</th><th>Ovr</th><th class=num>Own%</th><th class=num>Wk proj</th><th>Opp</th><th>Trend</th><th>ROS SOS</th><th>PO SOS</th><th class=num>RT</th><th class=num>FC</th></tr></thead><tbody>${pool.slice(0,150).map(p=>`<tr><td>${nm(p)}${p.owners?` <span class="mut">(${esc(Object.values(p.owners).join(","))})</span>`:""}</td><td>${pb(p)}</td><td>${p.ros.pos_rank}</td><td>${p.ros.overall||"-"}</td><td class=num>${p.own??"-"}</td><td class=num>${wp(p)??"-"}</td><td>${esc(p.opp||"")} ${gr(mg(p))}</td><td>${arrow(p)} ${p.adv?p.adv.trend_val:""}</td><td>${gr(sosG(p,"ros"))}</td><td>${gr(sosG(p,lg=="WAN"?"wan_po":"slope_po"))}</td><td class=num>${p.rt??"-"}</td><td class=num>${fcv(p,L()[lg].teams_count)??"-"}</td></tr>`).join("")}</tbody></table></div></div>`}
-const pos=p=>p.pos;
-/* ---------- Trade ---------- */
-function gradeSide(a,b,k){const A=a.reduce((s,p)=>s+(p[k]||0),0),B=b.reduce((s,p)=>s+(p[k]||0),0),miss=[...a,...b].filter(p=>p[k]==null).map(p=>p.name);
- const net=B-A,pct=Math.max(A,B)?net/Math.max(A,B):0;return {A,B,net,pct,miss,v:pct>.05?"win":pct<-.05?"over":"fair"}}
-function verdict(rt,fc){const lab={win:"YOU WIN",over:"YOU OVERPAY",fair:"FAIR"};const g=[rt,fc].filter(x=>!x.miss.length||x.B+x.A>0&&!x.miss.length);
- if(rt.miss.length&&!fc.miss.length)return [lab[fc.v],"FantasyCalc only (missing RotoTrade value: "+rt.miss.join(", ")+")",fc.v];
- if(rt.v==fc.v)return [lab[rt.v],"Both graders agree",rt.v];if(rt.v=="fair"||fc.v=="fair"){const o=rt.v=="fair"?fc.v:rt.v;return ["LEAN "+lab[o],"One grader says fair, the other says "+lab[o].toLowerCase(),o]}
- return ["SPLIT","Graders disagree (RT "+lab[rt.v]+", FC "+lab[fc.v]+")","fair"]}
-function tradeBox(){const a=S.A.map(byKey).filter(Boolean),b=S.B.map(byKey).filter(Boolean),k="fc"+S.fcT;if(!a.length||!b.length)return '<div class="mut">Add players to both sides.</div>';
- const rt=gradeSide(a,b,"rt"),fc=gradeSide(a,b,k),[v,why,c]=verdict(rt,fc),f=x=>(x>0?"+":"")+x.toFixed(1);
- return `<div class="verdict" style="background:${c=="win"?"#12391f":c=="over"?"#4a1414":"#1f2b44"}">${v}</div><div class="mut" style="text-align:center">${why}. + = Logan gains. Fair band ±5%.</div>
- <table style="margin-top:8px"><tr><th>Grader</th><th class=num>You give</th><th class=num>You get</th><th class=num>Net</th><th class=num>%</th></tr>
- <tr><td>RotoTrade (as of ${D.rt_as_of})</td><td class=num>${rt.A.toFixed(1)}</td><td class=num>${rt.B.toFixed(1)}</td><td class="num ${rt.net>=0?"good":"bad"}">${f(rt.net)}</td><td class=num>${f(rt.pct*100)}%</td></tr>
- <tr><td>FantasyCalc ${S.fcT}-tm</td><td class=num>${fc.A}</td><td class=num>${fc.B}</td><td class="num ${fc.net>=0?"good":"bad"}">${f(fc.net)}</td><td class=num>${f(fc.pct*100)}%</td></tr></table>
- ${rt.miss.length?`<div class="warn">No RotoTrade value for: ${rt.miss.map(esc).join(", ")}</div>`:""}${fc.miss.length?`<div class="warn">No FantasyCalc value for: ${fc.miss.map(esc).join(", ")}</div>`:""}`}
-function side(id,name){return `<div class="card" style="flex:1;min-width:260px"><h3>${name}</h3><input list="names" placeholder="Add player…" onchange="addT('${id}',this.value)">${S[id].map(byKey).filter(Boolean).map(p=>`<div class="row" style="margin:6px 0">${pb(p)} ${nm(p)} <span class="mut">ROS ${p.ros?.pos_rank||"–"} · ovr ${p.ros?.overall||"–"} · RT ${p.rt??"–"} · FC ${p["fc"+S.fcT]??"–"}</span><span class="pill" onclick="S.${id}=S.${id}.filter(k=>k!='${p.key}');render()">✕</span></div>`).join("")}</div>`}
-function addT(id,v){const p=findName(v);if(p&&!S[id].includes(p.key))S[id].push(p.key);render()}
-function suggestions(lg){const T=L()[lg].teams_count,k="fc"+T,r=roster(lg).filter(p=>!p._ir),{lineup,bench}=optimal(lg,p=>p[k]||0,r);
- const starters=lineup.filter(x=>x.p&&["QB","RB","WR","TE"].includes(x.slot)),need={};
- starters.forEach(({slot,p})=>{const n=L()[lg].slots.filter(s=>s==p.pos).length;const ratio=posNum(p)/(T*n);if(!need[p.pos]||ratio>need[p.pos].ratio)need[p.pos]={ratio,p}});
- const needs=Object.entries(need).sort((a,b)=>b[1].ratio-a[1].ratio).slice(0,2).map(x=>x[0]);
- const surplus=bench.filter(p=>p[k]&&p[k]>200&&["QB","RB","WR","TE"].includes(p.pos));const out=[];
- for(const s of surplus)for(const n of needs){if(s.pos==n)continue;const weakest=need[n].p;
-  P.filter(t=>t.pos==n&&!isMine(t,lg)&&t[k]&&posNum(t)<posNum(weakest)&&Math.abs(t[k]-s[k])/Math.max(t[k],s[k])<=.15).forEach(t=>{
-   const rt=(s.rt!=null&&t.rt!=null)?gradeSide([s],[t],"rt"):null,fc=gradeSide([s],[t],k);if(rt&&Math.abs(rt.pct)>.15)return;out.push({s,t,rt,fc,n,weakest})})}
- return {needs,out:out.sort((a,b)=>Math.abs(a.fc.pct)-Math.abs(b.fc.pct)).slice(0,20)}}
-function trade(){const lg=S.lg;S.fcT=L()[lg].teams_count;const sg=suggestions(lg);
- return `<div class="card"><div class="row">${lgPills()}</div><h2>Trade Analyzer</h2><div class="row">${side("A","You give")}${side("B","You get")}</div>${tradeBox()}</div>
- <div class="card"><h2>Trade Assistant: suggested trades</h2><div class="mut">Your bench players paired with similarly valued players (FC within 15%, RT within 15% where known) who'd beat your weakest starter at need positions: <b>${sg.needs.join(", ")}</b>. Ownership in ESPN is not verified unless the team is in rosters.json.</div>
- <div class="tw"><table><thead><tr><th>Give</th><th>Get</th><th>Owner</th><th>Upgrade over</th><th class=num>RT net</th><th class=num>FC net</th><th></th></tr></thead><tbody>${sg.out.map(x=>`<tr><td>${pb(x.s)} ${esc(x.s.name)}</td><td>${pb(x.t)} ${esc(x.t.name)} <span class="mut">${x.t.ros?.pos_rank||""}</span></td><td class="mut">${esc(x.t.owners?.[lg]||"unknown")}</td><td class="mut">${esc(x.weakest.name)} ${x.weakest.ros?.pos_rank||""}</td><td class=num>${x.rt?(x.rt.net>0?"+":"")+x.rt.net.toFixed(1):"n/a"}</td><td class=num>${x.fc.net>0?"+":""}${x.fc.net}</td><td><span class="pill" onclick="S.A=['${x.s.key}'];S.B=['${x.t.key}'];render();scrollTo(0,0)">Analyze</span></td></tr>`).join("")||'<tr><td colspan=7 class=mut>No matches.</td></tr>'}</tbody></table></div></div>`}
-/* ---------- League ---------- */
-function league(){return ["WAN","SLOPE"].map(lg=>{const T=L()[lg].teams_count,k="fc"+T,teams=Object.entries(L()[lg].teams);
- const rows=teams.map(([tn])=>{const list=P.filter(p=>p.owners&&p.owners[lg]===tn&&!(L()[lg].ir||[]).includes(p.name));const {lineup}=optimal(lg,p=>p[k]||0,list);
-  const wkL=optimal(lg,p=>wp(p)??-1,list).lineup;return {tn,wk:wkL.reduce((s,x)=>s+(x.p?wp(x.p)??0:0),0),fc:lineup.reduce((s,x)=>s+(x.p?.[k]||0),0),rt:lineup.reduce((s,x)=>s+(x.p?.rt||0),0),n:list.length}}).sort((a,b)=>b.fc-a.fc);
- return `<div class="card"><h2>League Analyzer: ${esc(L()[lg].name)} ${teams.length<T?`<span class="warn">(PARTIAL: ${teams.length} of ${T} teams)</span>`:""}</h2><div class="mut">Rosters as of ${esc(D.rosters.as_of||"")}</div>
- <table><tr><th>#</th><th>Team</th><th class=num>Wk proj</th><th class=num>Starters FC</th><th class=num>Starters RT</th><th class=num>Players</th></tr>${rows.map((r,i)=>`<tr class="${r.tn==myTeam(lg)?"mine":""}"><td>${i+1}</td><td>${esc(r.tn)} <span class=mut>${esc((L()[lg].managers||{})[r.tn]||"")}</span></td><td class=num>${r.wk.toFixed(1)}</td><td class=num>${r.fc}</td><td class=num>${r.rt.toFixed(1)}</td><td class=num>${r.n}</td></tr>`).join("")}</table><div class="mut">Outlook: ${esc(myTeam(lg))} ranks #${rows.findIndex(r=>r.tn==myTeam(lg))+1} of ${rows.length} loaded teams by ROS starter value. Score = sum of the ROS-optimal starting lineup's FantasyCalc redraft values (RT shown where seeded).</div></div>`}).join("")}
-/* ---------- Scores ---------- */
-const ESPNMAP={JAC:"JAX",WAS:"WSH"};
-async function loadScores(){const d=await (await fetch("/api/scoreboard")).json(),el=$("#games");if(!el)return;
- if(!d.games.length){el.innerHTML='<div class="bad">Scoreboard unavailable</div>';return}
- el.innerHTML=`<div class="mut">ESPN Week ${d.week} · refreshes every 60s</div>`+d.games.map(g=>{const ab=g.teams.map(t=>t.abbr);
-  const mine=P.filter(p=>(isMine(p,"WAN")||isMine(p,"SLOPE"))&&ab.includes(ESPNMAP[p.team]||p.team));
-  return `<div class="card"><div class="game"><div>${g.teams.slice().reverse().map(t=>`<div><img src="${t.logo}"> <b>${t.abbr}</b> <span class="mut">${t.record||""}</span> <b style="float:right;margin-left:20px">${g.state=="pre"?"":t.score}</b></div>`).join("")}</div><div class="mut" style="text-align:right">${esc(g.status)}<br>${esc(g.broadcast)}</div></div>${mine.length?`<div style="margin-top:6px">${mine.map(p=>`<span class="chip">${esc(p.name)}${badges(p)}</span>`).join("")}</div>`:""}</div>`}).join("");
- clearTimeout(window._st);window._st=setTimeout(()=>tab=="scores"&&loadScores(),60000)}
-function scores(){return `<div id="games"><div class="card">Loading ESPN scoreboard…</div></div>`}
-/* ---------- News ---------- */
-function news(){const mine=P.filter(p=>p.owners&&(isMine(p,"WAN")||isMine(p,"SLOPE")));const inj=mine.filter(p=>p.inj);
- const top=P.filter(p=>p.inj&&ro(p)<=150&&!mine.includes(p)).sort((a,b)=>ro(a)-ro(b));
- const row=p=>`<tr><td>${pb(p)} ${nm(p)}</td><td class="${/Out|IR|Doubt/.test(p.inj)?"bad":"warn"}"><b>${esc(p.inj)}</b></td><td>${esc(p.inj_part||"")}</td><td class="mut">${esc(p.inj_note||"")}</td></tr>`;
- return `<div class="card"><h2>🚑 Your injured players</h2><table><tr><th>Player</th><th>Status</th><th>Body</th><th>Note</th></tr>${inj.map(row).join("")||"<tr><td colspan=4>None flagged</td></tr>"}</table><div class="mut">Source: Sleeper public API (cached daily, ${D.status.sleeper?.fetched||""}). Healthy: ${mine.filter(p=>!p.inj).map(p=>esc(p.name)).join(", ")}</div></div>
- <div class="card"><h2>Injuries: top-150 ROS players</h2><div class="tw"><table><tr><th>Player</th><th>Status</th><th>Body</th><th>Note</th></tr>${top.map(row).join("")}</table></div></div>`}
-/* ---------- Values ---------- */
-function vals(){let l=P.filter(p=>p.fc12||p.rt);if(S.q)l=l.filter(p=>p.name.toLowerCase().includes(S.q.toLowerCase()));if(S.pos!="ALL")l=l.filter(p=>S.pos=="FLEX"?["RB","WR","TE"].includes(p.pos):p.pos==S.pos);
- const k=S.vs;l.sort((a,b)=>{const x=k=="name"?a.name.localeCompare(b.name):(a[k]??-1e9)-(b[k]??-1e9);return x*S.vd});
- const th=(key,t)=>`<th class=num onclick="S.vd=S.vs=='${key}'?-S.vd:-1;S.vs='${key}';render()">${t}${S.vs==key?(S.vd<0?" ▼":" ▲"):""}</th>`;
- return `<div class="card"><h2>Trade Values</h2><div class="row">${pills("pos",["ALL","QB","RB","WR","TE","FLEX"].map(x=>[x,x]))}<input placeholder="Search" value="${esc(S.q)}" onchange="S.q=this.value;render()"></div><div class="mut">RotoTrade: seed file as of ${D.rt_as_of} (${P.filter(p=>p.rt).length} players; rototrade.com is client-rendered). FantasyCalc: live redraft PPR 1QB, fetched ${D.status.fc12?.fetched}.</div>
- <div class="tw"><table><thead><tr>${th("name","Player")}<th>Pos</th>${th("rt","RotoTrade")}${th("fc12","FC 12-tm")}${th("fc16","FC 16-tm")}</tr></thead><tbody>${l.slice(0,500).map(p=>`<tr class="${p.owners?"mine":""}"><td>${nm(p)}</td><td>${pb(p)}</td><td class=num>${p.rt??"-"}</td><td class=num>${p.fc12??"-"}</td><td class=num>${p.fc16??"-"}</td></tr>`).join("")}</tbody></table></div></div>`}
-
-const TC={JAC:"JAX",WSH:"WAS",LA:"LAR"},tc=t=>TC[t]||t;
-function oppAt(p,w){const s=D.sched&&D.sched[tc(p.team)];return s?s[String(w)]:null}
-function mg(p,w){w=w||D.cur_week;const o=oppAt(p,w);if(!o||!D.fpa||!D.fpa[p.pos])return null;const r=D.fpa[p.pos][o.split(/[ @]/).pop()]?.rank;if(!r)return null;const q=r/32;return q>.8?"A":q>.6?"B":q>.4?"C":q>.2?"D":"F"}
-const GS={A:1,B:.5,C:0,D:-.5,F:-1},adjP=p=>(wp(p)??0)*(1+.1*(GS[mg(p)]??0)),gr=g=>g?`<span class="g g${g}">${g}</span>`:'<span class="mut">–</span>';
-const arrow=p=>p.adv?(p.adv.trend=="up"?'<span class="good">▲</span>':p.adv.trend=="down"?'<span class="bad">▼</span>':'<span class="mut">▬</span>'):"";
-const sosG=(p,k)=>D.sos&&D.sos[tc(p.team)]&&D.sos[tc(p.team)][p.pos]?D.sos[tc(p.team)][p.pos][k]?.grade:null;
-function bad(p){if(wp(p)==null)return "bye/no projection";if(/Out|IR|Doubtful|Sus/.test(p.inj||""))return p.inj;if(wp(p)<1)return "projected "+wp(p);return null}
-function autopilot(lg){const r=roster(lg).filter(p=>!p._ir),{lineup,bench}=optimal(lg,p=>wp(p)??-1),flags=[];
- lineup.forEach(({slot,p})=>{if(!p)return;const why=bad(p);if(why){const alt=bench.filter(b=>elig(slot,b)&&!bad(b)).sort((a,b)=>wp(b)-wp(a))[0];flags.push(`🚨 <b>${slot} ${esc(p.name)}</b>: ${esc(why)} → ${alt?`swap in <b>${esc(alt.name)}</b> (${wp(alt)})`:"no healthy bench option, check waivers"}`)}});
- const q=lineup.filter(x=>x.p&&/Questionable/.test(x.p.inj||"")).map(x=>`⚠️ ${esc(x.p.name)} is Questionable; confirm before kickoff`);
- const benchBad=r.filter(p=>bad(p)&&!lineup.some(x=>x.p===p)).map(p=>esc(p.name)+" ("+esc(bad(p))+")");
- return `<div class="card"><h2>Lineup Autopilot check</h2>${flags.join("<br>")||'<div class="good">✅ No optimal starter is on bye, Out, Doubtful or projected 0.</div>'}${q.length?"<br>"+q.join("<br>"):""}${benchBad.length?`<div class="mut">Make sure these aren't in your ESPN lineup: ${benchBad.join(", ")}</div>`:""}</div>`}
-function openP(k){const p=byKey(k);if(!p)return;const a=p.adv,m=$("#modal");const wk=[];for(let w=D.cur_week;w<=17;w++){const o=oppAt(p,w);wk.push(`<tr><td>Wk ${w}</td><td>${esc(o||"BYE")}</td><td>${o?gr(mg(p,w)):""}</td></tr>`)}
- m.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><h2>${pb(p)} ${esc(p.name)} ${badges(p)}</h2><span class="pill" onclick="$('#modal').style.display='none'">✕</span></div>
- <div class="mut">${esc(p.team||"")} · bye ${esc(p.bye||"–")} ${p.owners?"· owned: "+esc(Object.entries(p.owners).map(x=>x[0]+": "+x[1]).join(", ")):""}</div>
- ${p.inj?`<div class="bad"><b>${esc(p.inj)}</b> ${esc(p.inj_part||"")} ${esc(p.inj_note||"")}</div>`:'<div class="good">No injury designation (Sleeper)</div>'}
- <div class="grid" style="margin-top:8px"><div class="card"><h3>Week ${D.cur_week}</h3><div class="big">${wp(p)??"–"}</div>${esc(p.wk?.pos_rank||"unranked")} · ${esc(p.opp||"")} ${gr(mg(p))}<div class="mut">ECR ${p.wk?.rank||"-"} · range ${p.wk?.best||"-"}–${p.wk?.worst||"-"} · grade ${p.wk?.grade||"-"}</div></div>
- <div class="card"><h3>Rest of season</h3><div class="big">${esc(p.ros?.pos_rank||"–")}</div>Overall ${p.ros?.overall||"–"}<div class="mut">SOS ROS ${gr(sosG(p,"ros"))} · WAN PO ${gr(sosG(p,"wan_po"))} · Slope PO ${gr(sosG(p,"slope_po"))}</div></div>
- <div class="card"><h3>Trade value</h3>RotoTrade <b>${p.rt??"n/a"}</b><br>FC 12 <b>${p.fc12??"n/a"}</b> · FC 16 <b>${p.fc16??"n/a"}</b></div></div>
- ${a?`<h3>Usage (nflverse ${D.adv_season}) ${arrow(p)}</h3><div class="mut">${a.g} g · ${a.ppg} PPR/g · ${a.tgt_g} tgt/g · ${a.ts}% tgt share · ${a.ay_g} air yds/g · ${a.touch_g} touches/g · snap ${a.snap??"–"}%</div>
- <table><tr><th>Wk</th><th>Opp</th><th class=num>PPR</th><th class=num>Tgt</th><th class=num>Touch</th><th class=num>Snap%</th></tr>${a.last3.map(x=>`<tr><td>${x.wk}</td><td>${x.opp}</td><td class=num>${x.ppr}</td><td class=num>${x.tgt}</td><td class=num>${x.touch}</td><td class=num>${x.snap??"–"}</td></tr>`).join("")}</table>`:'<div class="mut">No nflverse usage data.</div>'}
- <h3>Schedule & matchup grades</h3><table>${wk.join("")}</table><div class="mut">Grade = opponent's PPR pts allowed to ${p.pos}s (A easiest).</div></div>`;m.style.display="block"}
-function stats(){let l=P.filter(p=>p.adv&&p.adv.g);if(S.pos!="ALL")l=l.filter(p=>S.pos=="FLEX"?["RB","WR","TE"].includes(p.pos):p.pos==S.pos);if(S.q)l=l.filter(p=>p.name.toLowerCase().includes(S.q.toLowerCase()));
- const k=S.sk||"ppg";l.sort((a,b)=>(b.adv[k]??-1)-(a.adv[k]??-1));const th=(c,t)=>`<th class=num onclick="S.sk='${c}';render()">${t}${k==c?" ▼":""}</th>`;
- return `<div class="card"><h2>Advanced usage stats</h2><div class="mut">nflverse ${D.adv_season} regular season thru week ${D.adv_thru}. Trend = touches+targets, last 3 games vs earlier. Red-zone usage: <b>not available</b> (needs play-by-play, not in the weekly player file).</div>
- <div class="row">${pills("pos",["ALL","QB","RB","WR","TE","FLEX"].map(x=>[x,x]))}<input placeholder="Search" value="${esc(S.q)}" onchange="S.q=this.value;render()"></div>
- <div class="tw"><table><thead><tr><th>Player</th><th>Pos</th><th>Trend</th>${th("g","G")}${th("ppg","PPR/g")}${th("snap","Snap%")}${th("tgt_g","Tgt/g")}${th("ts","Tgt share%")}${th("ay_g","Air yds/g")}${th("touch_g","Touch/g")}<th>Last 3 (tgt+touch)</th></tr></thead><tbody>${l.slice(0,300).map(p=>`<tr class="${p.owners?"mine":""}"><td>${nm(p)}</td><td>${pb(p)}</td><td>${arrow(p)} ${p.adv.trend_val}</td><td class=num>${p.adv.g}</td><td class=num>${p.adv.ppg}</td><td class=num>${p.adv.snap??"–"}</td><td class=num>${p.adv.tgt_g}</td><td class=num>${p.adv.ts}</td><td class=num>${p.adv.ay_g}</td><td class=num>${p.adv.touch_g}</td><td class=mut>${p.adv.last3.map(x=>x.tgt+x.touch).join(" · ")}</td></tr>`).join("")}</tbody></table></div></div>`}
-function sos(){const pos=["QB","RB","WR","TE"].includes(S.pos)?S.pos:"RB";if(!D.fpa)return '<div class="card bad">nflverse data unavailable</div>';
- const teams=Object.keys(D.fpa[pos]).sort((a,b)=>D.fpa[pos][b].rank-D.fpa[pos][a].rank);
- return `<div class="card"><h2>Strength of schedule · ${pos}</h2><div class="row">${["QB","RB","WR","TE"].map(x=>`<span class="pill ${pos==x?"on":""}" onclick="S.pos='${x}';render()">${x}</span>`).join("")}</div>
- <div class="mut">"Allowed" = avg PPR pts a defense gives up to ${pos}s per game (nflverse ${D.adv_season} thru wk ${D.adv_thru}). SOS grades rank each offense's remaining opponents (A = softest). ESPN schedule weeks ${D.cur_week}–17.</div>
- <div class="tw"><table><thead><tr><th>Team</th><th class=num>Pts allowed to ${pos} (rank, 32=most)</th><th>Wk ${D.cur_week}</th><th>ROS SOS</th><th>WAN PO 13–17</th><th>Slope PO 12–17</th><th>Playoff opponents</th></tr></thead><tbody>
- ${teams.map(t=>{const s=D.sos[t]?.[pos]||{},sc=D.sched[t]||{};const fake={team:t,pos};return `<tr><td><b>${t}</b></td><td class=num>${D.fpa[pos][t].fpa} (${D.fpa[pos][t].rank})</td><td>${esc(sc[D.cur_week]||"BYE")} ${gr(mg(fake))}</td><td>${gr(s.ros?.grade)}</td><td>${gr(s.wan_po?.grade)}</td><td>${gr(s.slope_po?.grade)}</td><td class=mut>${[12,13,14,15,16,17].map(w=>sc[w]||"BYE").join(", ")}</td></tr>`}).join("")}</tbody></table></div></div>`}
-function finder(){return ["WAN","SLOPE"].map(lg=>{const T=L()[lg].teams_count,k="fc"+T,mine=roster(lg).filter(p=>!p._ir),others=Object.keys(L()[lg].teams).filter(t=>t!=myTeam(lg)),mgr=L()[lg].managers||{};
- const {lineup,bench}=optimal(lg,p=>p[k]||0,mine);let weak=null;lineup.forEach(({slot,p})=>{if(!p||!["QB","RB","WR","TE"].includes(p.pos))return;const n=L()[lg].slots.filter(s=>s==p.pos).length,r=posNum(p)/(T*n);if(!weak||r>weak.r)weak={r,p}});
- if(!others.length)return `<div class="card"><h2>Trade Finder · ${esc(L()[lg].name)}</h2><div class="warn">No other ${esc(L()[lg].name)} rosters are loaded, so there's nobody to scan. Add each team (and "managers") to data/rosters.json and this scans all of them automatically. Weakest starter right now: <b>${esc(weak?.p.name)}</b> (${weak?.p.ros?.pos_rank}).</div></div>`;
- const res=[],within=(a,b,key)=>{const A=a.reduce((s,p)=>s+(p[key]??NaN),0),B=b.reduce((s,p)=>s+(p[key]??NaN),0);return isFinite(A)&&isFinite(B)&&Math.abs(B-A)/Math.max(A,B)<=.05?B-A:null};
- const give=mine.filter(p=>p[k]&&p!==weak.p&&["QB","RB","WR","TE"].includes(p.pos));
- const test=(a,g,t)=>{const all=[...a,g],f=within(a,[g],k);if(f==null)return;const hasRT=all.every(p=>p.rt!=null),r=hasRT?within(a,[g],"rt"):null;if(hasRT&&r==null)return;res.push({t,give:a,get:g,r,f,src:hasRT?"RT+FC":"FC only"})};
- for(const t of others){const theirs=P.filter(p=>p.owners&&p.owners[lg]===t&&p.pos==weak.p.pos&&posNum(p)<posNum(weak.p));
-  for(const g of theirs){for(const a of give)test([a],g,t);for(let i=0;i<give.length;i++)for(let j=i+1;j<give.length;j++)test([give[i],give[j]],g,t)}}
- res.sort((a,b)=>(a.src!="RT+FC")-(b.src!="RT+FC")||posNum(a.get)-posNum(b.get)||Math.abs(a.f)-Math.abs(b.f));
- return `<div class="card"><h2>Trade Finder · ${esc(L()[lg].name)}</h2><div class="mut">Weakest starter: <b>${esc(weak.p.name)}</b> ${weak.p.ros?.pos_rank}. Deals within ±5% on BOTH RotoTrade and FantasyCalc ${T}-tm that land a better ${weak.p.pos}. When any player lacks a RotoTrade value the deal is graded on FantasyCalc only and flagged "FC only". Rosters as of ${esc(D.rosters.as_of||"")}.</div>
- <table><tr><th>Team (manager)</th><th>You give</th><th>You get</th><th class=num>RT net</th><th class=num>FC net</th><th>Graded by</th></tr>${res.slice(0,40).map(x=>`<tr><td>${esc(x.t)} <span class=mut>${esc(mgr[x.t]||"")}</span></td><td>${x.give.map(p=>esc(p.name)).join(" + ")}</td><td>${esc(x.get.name)} <span class=mut>${x.get.ros?.pos_rank}</span></td><td class=num>${x.r!=null?x.r.toFixed(1):"n/a"}</td><td class=num>${x.f}</td><td class="${x.src=="FC only"?"warn":"good"}">${x.src}</td></tr>`).join("")||"<tr><td colspan=6 class=mut>No deals meet both ±5% tests.</td></tr>"}</table></div>`}).join("")}
-
-S.rec=1;S.ptd=4;try{const v=localStorage.sc;if(v){[S.rec,S.ptd]=v.split(",").map(Number)}}catch(e){}
-function setSc(v){[S.rec,S.ptd]=v.split(",").map(Number);try{localStorage.sc=v}catch(e){}render()}
-const scLab=()=>`${S.rec==1?"PPR":S.rec==.5?"Half":"Std"} · ${S.ptd}pt PTD`;
-function fpts(t){return t.passing_yards*.04+t.passing_tds*S.ptd-t.passing_interceptions*2+t.rushing_yards*.1+t.rushing_tds*6+t.receptions*S.rec+t.receiving_yards*.1+t.receiving_tds*6-t.fumbles_lost_total*2+2*(t.passing_2pt_conversions+t.rushing_2pt_conversions+t.receiving_2pt_conversions)}
-const ppgS=p=>p.adv&&p.adv.tot&&p.adv.g?+(fpts(p.adv.tot)/p.adv.g).toFixed(1):null;
-const _render=render;render=function(){const e=document.getElementById("scsel");if(e&&e.value)e.value=S.rec+","+S.ptd;_render()};
-const _stats=stats;stats=function(){return `<div class="card mut">Scoring: <b>${scLab()}</b> (change top right). WAN = PPR 4pt PTD; Slopeside = PPR (pass-TD value not confirmed, 4pt assumed). "My PPG" is recomputed from nflverse box stats; FantasyPros projections/ranks are fixed PPR.</div>`+_stats().replace('<th>Last 3','<th class=num>My PPG</th><th>Last 3').replace(/(<td class=mut>[^<]*<\/td><\/tr>)/g,"$1").replace(/<tr class="([^"]*)"><td><b class="pl" onclick="openP\('([^']+)'\)">/g,(m,c,k)=>m)}
-const _stats2=stats;stats=function(){let h=_stats2();return h.replace(/<td class=mut>([^<]*)<\/td><\/tr>/g,(m,a,off)=>m)}
-/* simpler: inject My PPG via post-pass */
-stats=(function(base){return function(){const h=base();const keys=[...h.matchAll(/<tr class="[^"]*"><td><b class="pl" onclick="openP\('([^']+)'\)"/g)].map(x=>x[1]);let i=0;return h.replace(/<td class=mut>([^<]*)<\/td><\/tr>/g,(m,a)=>{const p=byKey(keys[i++]);return `<td class=num>${p?ppgS(p)??"–":"–"}</td><td class=mut>${a}</td></tr>`})}})(_stats);
-const _openP=openP;openP=function(k){_openP(k);const p=byKey(k);if(p&&p.adv){const m=$("#modal .card");m.insertAdjacentHTML("beforeend",`<div class="mut">Season PPG in your scoring (${scLab()}): <b>${ppgS(p)}</b> · projection above is FantasyPros fixed PPR.${p.cuff?" · Handcuff (Sleeper depth): "+esc(p.cuff):""}</div>`)}};
-/* Auto Pilot card */
-function apCard(lg){const {lineup,bench}=optimal(lg,p=>adjP(p)||(wp(p)??-1));
- return `<div class="card" style="border-color:var(--blu)"><h2>🤖 Auto Pilot check: exact lineup to set</h2>${lineup.map(({slot,p})=>`<div>• <b>${slot}</b> → ${p?esc(p.name)+` <span class=mut>(${wp(p)??0} proj ${p.opp?esc(p.opp):""} ${mg(p)||""})</span>`:"<span class=bad>EMPTY, needs add</span>"}</div>`).join("")}
- <div class="mut" style="margin-top:6px">Bench: ${bench.map(p=>esc(p.name)).join(", ")}</div><div class="warn" style="margin-top:6px">This app never touches ESPN. Logan approves these changes in chat, then the assistant makes them in ESPN and confirms.</div></div>`}
-/* Trade finder refactor */
-function findDeals(lg){const T=L()[lg].teams_count,k="fc"+T,mine=roster(lg).filter(p=>!p._ir),others=Object.keys(L()[lg].teams).filter(t=>t!=myTeam(lg));
- const {lineup}=optimal(lg,p=>p[k]||0,mine);let weak=null;lineup.forEach(({slot,p})=>{if(!p||!["QB","RB","WR","TE"].includes(p.pos))return;const n=L()[lg].slots.filter(s=>s==p.pos).length,r=posNum(p)/(T*n);if(!weak||r>weak.r)weak={r,p}});
- const res=[],within=(a,b,key)=>{const A=a.reduce((s,p)=>s+(p[key]??NaN),0),B=b.reduce((s,p)=>s+(p[key]??NaN),0);return isFinite(A)&&isFinite(B)&&Math.abs(B-A)/Math.max(A,B)<=.05?B-A:null};
- const give=mine.filter(p=>p[k]&&p!==weak.p&&["QB","RB","WR","TE"].includes(p.pos));
- const test=(a,g,t)=>{const f=within(a,[g],k);if(f==null)return;const hasRT=[...a,g].every(p=>p.rt!=null),r=hasRT?within(a,[g],"rt"):null;if(hasRT&&r==null)return;res.push({t,give:a,get:g,r,f,src:hasRT?"RT+FC":"FC only"})};
- for(const t of others){P.filter(p=>p.owners&&p.owners[lg]===t&&p.pos==weak.p.pos&&posNum(p)<posNum(weak.p)).forEach(g=>{give.forEach(a=>test([a],g,t));for(let i=0;i<give.length;i++)for(let j=i+1;j<give.length;j++)test([give[i],give[j]],g,t)})}
- res.sort((a,b)=>(a.src!="RT+FC")-(b.src!="RT+FC")||posNum(a.get)-posNum(b.get)||Math.abs(a.f)-Math.abs(b.f));return {weak,res,others}}
-/* Planner */
-const oppOf=(t,w)=>{const o=D.sched?.[tc(t)]?.[w];return o?o.split(/[ @]/).pop():null};
-function streamers(lg,pos,w){return P.filter(p=>p.pos==pos&&p.team&&!owned(p,lg)).map(p=>{const o=oppOf(p.team,w);if(!o)return null;const ts=D.team_stats||{},me=ts[tc(p.team)]||{},op=ts[o]||{};
-  const sc=pos=="DST"?(100-(op.off_ppg||100))+10*(op.give_g||0):(me.off_ppg||0)+["QB","RB","WR","TE"].reduce((s,q)=>s+(D.fpa[q][o]?.fpa||0),0)/4;return {p,o,sc,op}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,3)}
-function plan(){const lg=S.lg,r=roster(lg).filter(p=>!p._ir),rows=[];
- for(let w=D.cur_week+1;w<=17;w++){const avail=r.filter(p=>oppAt(p,w)),{lineup}=optimal(lg,p=>1000-ro(p),avail),full=optimal(lg,p=>1000-ro(p),r).lineup;
-  const holes=full.filter(x=>x.p&&!oppAt(x.p,w)).map(x=>{const fill=lineup.find(y=>y.slot==x.slot&&y.p&&!full.some(z=>z.p===y.p));return `${esc(x.p.name)} (${x.slot}) on bye → ${fill?"start "+esc(fill.p.name):'<span class=bad>no bench fill, add from waivers</span>'}`});
-  const d=streamers(lg,"DST",w),k=streamers(lg,"K",w);
-  rows.push(`<tr><td><b>Wk ${w}</b></td><td>${holes.join("<br>")||'<span class=good>none</span>'}</td><td>${d.map(x=>`${esc(x.p.team)} vs ${x.o} <span class=mut>(opp ${x.op.off_ppg} off/g, ${x.op.give_g} giveaways/g)</span>`).join("<br>")}</td><td>${k.map(x=>`${esc(x.p.name)} <span class=mut>(${esc(x.p.team)} v ${x.o})</span>`).join("<br>")}</td></tr>`)}
- const cuffs=r.filter(p=>p.pos=="RB"&&p.cuff).map(p=>{const c=findName(p.cuff);return `<div>• ${esc(p.name)} → <b>${esc(p.cuff)}</b> <span class=mut>${c?(owned(c,lg)?"rostered by "+esc(c.owners[lg]):"not on a loaded roster")+" · ROS "+(c.ros?.pos_rank||"unranked"):""}</span></div>`}).join("");
- return `<div class="card"><div class="row">${lgPills()}</div><h2>Waiver Planner · Weeks ${D.cur_week+1}–17</h2><div class="mut">Bye holes use the ROS-best lineup. D/ST streamers favor opponents with low offensive PPR output and high giveaways (INT + fumbles + ½ sacks per game, nflverse ${D.adv_season}). K streamers favor strong own offense facing generous defenses. Only players not on a loaded ${esc(L()[lg].name)} roster are listed${L()[lg].partial?` (WAN is partial: ${esc(L()[lg].partial)}, so confirm in ESPN)`:""}.</div>
- <div class="tw"><table><thead><tr><th>Week</th><th>Bye holes & fills</th><th>D/ST streamers</th><th>K streamers</th></tr></thead><tbody>${rows.join("")}</tbody></table></div></div>
- <div class="card"><h2>Handcuff targets</h2>${cuffs||"<div class=mut>No depth chart data</div>"}<div class="mut">Next RB on each team's Sleeper depth chart.</div></div>`}
-/* Report */
-function groupGrades(lg){const T=L()[lg].teams_count,k="fc"+T,teams=Object.keys(L()[lg].teams),slots=L()[lg].slots,out={};
- for(const g of ["QB","RB","WR","TE"]){const n=slots.filter(s=>s==g).length+(g=="RB"||g=="WR"?1:0);const v=teams.map(t=>[t,P.filter(p=>p.owners?.[lg]===t&&p.pos==g).map(p=>p[k]||0).sort((a,b)=>b-a).slice(0,n).reduce((a,b)=>a+b,0)]).sort((a,b)=>b[1]-a[1]);
-  const i=v.findIndex(x=>x[0]==myTeam(lg)),q=1-i/v.length;out[g]={rank:i+1,of:v.length,val:v[i][1],grade:q>.8?"A":q>.6?"B":q>.4?"C":q>.2?"D":"F"}}return out}
-function report(){return ["WAN","SLOPE"].map(lg=>{const g=groupGrades(lg),ent=Object.entries(g),best=ent.slice().sort((a,b)=>a[1].rank-b[1].rank)[0],worst=ent.slice().sort((a,b)=>b[1].rank-a[1].rank)[0];
- const po=lg=="WAN"?"wan_po":"slope_po",st=optimal(lg,p=>1000-ro(p)).lineup.filter(x=>x.p&&["QB","RB","WR","TE"].includes(x.p.pos));
- const fd=findDeals(lg),moves=[];if(fd.res[0]){const x=fd.res[0];moves.push(`🔄 Trade ${x.give.map(p=>esc(p.name)).join(" + ")} to ${esc(x.t)} (${esc(L()[lg].managers?.[x.t]||"")}) for ${esc(x.get.name)}: upgrades ${esc(fd.weak.p.name)} (${x.src}, FC net ${x.f})`)}
- const ap=autopilot(lg).match(/🚨[^<]*<b>[^<]*<\/b>[^<]*/);if(ap)moves.push(ap[0].replace(/<[^>]+>/g,""));
- const _lg=S.lg;S.lg=lg;const wh=wav();S.lg=_lg;const w=wh.match(/📈 <b>ADD [^<]*<\/b>[^·]*· <b class="bad">DROP [^<]*<\/b>/);if(w)moves.push(w[0].replace(/<[^>]+>/g,""));
- return `<div class="card"><h2>📋 Report card · ${esc(L()[lg].name)} · ${esc(myTeam(lg))}</h2>${L()[lg].partial?`<div class=warn>Partial league: ${esc(L()[lg].partial)}</div>`:""}
- <div class="grid">${ent.map(([k,v])=>`<div class="card" style="text-align:center"><h3>${k}</h3><div class="big g g${v.grade}">${v.grade}</div><div class=mut>#${v.rank} of ${v.of} · FC ${v.val}</div></div>`).join("")}</div>
- <div><b class=good>Strength:</b> ${best[0]} (#${best[1].rank}) · <b class=bad>Weakness:</b> ${worst[0]} (#${worst[1].rank})</div>
- <h3>Playoff schedule outlook (Weeks ${lg=="WAN"?"13":"12"}–17)</h3><div>${st.map(x=>`<span class=chip>${esc(x.p.name)} ${gr(sosG(x.p,po))}</span>`).join("")}</div>
- <h3>Top 3 moves</h3>${moves.slice(0,3).map(m=>`<div>• ${m}</div>`).join("")||"<div class=mut>No moves flagged</div>"}
- <div class=mut>Grades = Logan's top starters' FantasyCalc value at each position (plus a flex player for RB/WR) ranked against every loaded team. Moves come from the Finder, the Auto Pilot check and the Waiver Assistant.</div></div>`}).join("")}
-/* Edge */
-function edge(){const lg=S.lg,mine=roster(lg),wk=P.filter(p=>p.wk&&p.wk.delta!=null&&p.wk.rank<=150);
- const up=wk.slice().sort((a,b)=>b.wk.delta-a.wk.delta).slice(0,10),dn=wk.slice().sort((a,b)=>a.wk.delta-b.wk.delta).slice(0,10);
- const us=P.filter(p=>p.adv&&p.adv.g>=3&&p.ros&&ro(p)<=250).sort((a,b)=>b.adv.trend_val-a.adv.trend_val).slice(0,10);
- const ms=mine.filter(p=>p.wk&&mg(p)),starts=ms.filter(p=>"AB".includes(mg(p))).sort((a,b)=>wp(b)-wp(a)),sits=ms.filter(p=>"DF".includes(mg(p))).sort((a,b)=>wp(a)-wp(b));
- const sl=P.filter(p=>p.own!=null&&p.own<40&&p.wk&&"AB".includes(mg(p)||"x")&&p.adv&&p.adv.trend=="up"&&!owned(p,lg)).sort((a,b)=>wp(b)-wp(a)).slice(0,10);
- const li=(l,f)=>l.map(p=>`<div>${pb(p)} ${nm(p)} <span class=mut>${f(p)}</span></div>`).join("")||"<div class=mut>None</div>";
- return `<div class="card"><div class="row">${lgPills()}</div><h2>⚡ Weekly Edge · Week ${D.cur_week} · ${esc(L()[lg].name)}</h2><div class=mut>Auto-generated from FantasyPros (ECR change = player_ecr_delta), nflverse usage, and matchup grades. Updated ${D.meta.weekly?.updated}.</div></div>
- <div class="grid"><div class="card"><h2>📈 ECR risers</h2>${li(up,p=>`+${p.wk.delta} → ${p.wk.pos_rank}`)}</div><div class="card"><h2>📉 ECR fallers</h2>${li(dn,p=>`${p.wk.delta} → ${p.wk.pos_rank}`)}</div>
- <div class="card"><h2>🔥 Usage risers</h2>${li(us,p=>`+${p.adv.trend_val} touches+tgts/g (last 3: ${p.adv.last3.map(x=>x.tgt+x.touch).join(", ")})`)}</div>
- <div class="card"><h2>✅ Matchup starts (your roster)</h2>${li(starts,p=>`${p.opp} ${mg(p)} · ${wp(p)} proj`)}</div><div class="card"><h2>⛔ Matchup sits/caution</h2>${li(sits,p=>`${p.opp} ${mg(p)} · ${wp(p)} proj`)}</div>
- <div class="card"><h2>💎 Sleepers</h2>${li(sl,p=>`${p.own}% rostered · ${p.opp} ${mg(p)} · ${wp(p)} proj · usage ▲${p.adv.trend_val}`)}<div class=mut>Under 40% rostered, A/B matchup, rising usage, not on a loaded roster.</div></div></div>`}
-function finder(){return ["WAN","SLOPE"].map(lg=>{const T=L()[lg].teams_count,{weak,res,others}=findDeals(lg),mgr=L()[lg].managers||{};
- return `<div class="card"><h2>Trade Finder · ${esc(L()[lg].name)} ${L()[lg].partial?`<span class=warn>(${esc(L()[lg].partial)})</span>`:""}</h2><div class="mut">Weakest starter: <b>${esc(weak.p.name)}</b> ${weak.p.ros?.pos_rank}. 1-for-1 and 2-for-1 deals within ±5% on RotoTrade AND FantasyCalc ${T}-tm that land a better ${weak.p.pos}. If any player lacks a RotoTrade value, the deal is graded on FantasyCalc only and flagged. Rosters as of ${esc(D.rosters.as_of||"")}. Scanned ${others.length} teams.</div>
- <div class=tw><table><tr><th>Team (manager)</th><th>You give</th><th>You get</th><th class=num>RT net</th><th class=num>FC net</th><th>Graded by</th></tr>${res.slice(0,40).map(x=>`<tr><td>${esc(x.t)} <span class=mut>${esc(mgr[x.t]||"")}</span></td><td>${x.give.map(p=>esc(p.name)).join(" + ")}</td><td>${esc(x.get.name)} <span class=mut>${x.get.ros?.pos_rank}</span></td><td class=num>${x.r!=null?x.r.toFixed(1):"n/a"}</td><td class=num>${x.f}</td><td class="${x.src=="FC only"?"warn":"good"}">${x.src}</td></tr>`).join("")||"<tr><td colspan=6 class=mut>No deals pass.</td></tr>"}</table></div></div>`}).join("")}
-load();
-</script><script>if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js')</script></body></html>
+const TABS=[["home","📋","Playbook"],["moves","⇄","Moves"],["rank","☷","Rankings"],["news","📰","News"]];if(localStorage.theme!=="dark")document.documentElement.classList.add("light");function theme(){const c=document.documentElement.classList.toggle("light");localStorage.theme=c?"light":"dark";document.querySelector("meta[name=theme-color]").content=c?"#ffffff":"#0d1117"}
+let D=null,NEWS=[],tab=["home","moves","rank","news","team"].includes(localStorage.tab)?localStorage.tab:"home",lg=localStorage.lg||"WAN",rk={mode:"wk",pos:"RB",q:""},mvSeg="w";
+const dis=JSON.parse(localStorage.dismissed||"{}");
+const $=s=>document.getElementById(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=n=>String(n).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[.'`]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").split(/\s+/).filter(Boolean).join(" ");
+const fmt=n=>n==null?"n/a":Math.round(n).toLocaleString();
+const sgn=n=>n==null?"n/a":(n>0?"+":"")+(Math.abs(n)>=100?Math.round(n).toLocaleString():(Math.round(n*10)/10));
+async function load(force){
+  const [d,n]=await Promise.all([fetch("/api/data").then(r=>r.json()),fetch("/api/news").then(r=>r.json()).catch(()=>({items:[]}))]);
+  D=d;NEWS=n.items||[];D.byKey={};D.players.forEach(p=>D.byKey[p.key]=p);
+  $("upd").textContent="Updated "+new Date(D.built*1000).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+" · Week "+D.cur_week;render();
+}
+async function refresh(){const b=$("rf");b.classList.add("spin");b.disabled=true;$("upd").textContent="Refreshing FantasyPros, FantasyCalc, Sleeper, schedule, news…";
+  try{const r=await fetch("/api/refresh",{method:"POST"});if(!r.ok)throw 0;await load();}catch(e){$("upd").textContent="Refresh failed; showing last data";}
+  b.classList.remove("spin");b.disabled=false;}
+function L(){return D.rosters.leagues[lg]}
+function myKeys(id){const l=D.rosters.leagues[id||lg];return (D.rosters.resolved[id||lg]||{})[l.my_team]||[]}
+function status(p,id){const l=D.rosters.leagues[id||lg];const o=(l.espn_status||{})[p.name];if(o)return o;
+  if((l.ir||[]).includes(p.name))return "IR";const m={Questionable:"Q",Doubtful:"D",Out:"O",IR:"IR",PUP:"IR",Sus:"O"};return m[p.inj]||null}
+const onBye=p=>String(p.bye)===String(D.cur_week);
+const pts=p=>p.wk&&p.wk.pts!=null?p.wk.pts:0;
+const locked=p=>p.game_status&&p.game_status!=="scheduled"||(p.kickoff&&p.kickoff*1000<Date.now());
+const okStart=(p,id)=>!onBye(p)&&!["O","D","IR"].includes(status(p,id));
+function tags(p,id){let s="";const st=status(p,id);if(st)s+=`<span class="tag t${st}">${st}</span>`;if(onBye(p))s+=`<span class="tag tBYE">BYE</span>`;if(locked(p)&&!onBye(p))s+=`<span class="tag tL">LOCKED</span>`;return s}
+const FLEX={FLEX:["RB","WR","TE"]};
+function lineups(){
+  const l=L(),slots=l.slots,keys=myKeys().filter(k=>!(l.ir||[]).includes(D.byKey[k].name)),ps=keys.map(k=>D.byKey[k]);
+  const cur=slots.map((s,i)=>({slot:s,p:ps[i]})),bench=ps.slice(slots.length);
+  const opt=slots.map(s=>({slot:s,p:null}));const used=new Set();
+  cur.forEach((c,i)=>{if(c.p&&locked(c.p)&&!onBye(c.p)){opt[i].p=c.p;used.add(c.p.key)}});
+  const lockedBench=new Set(bench.filter(p=>locked(p)).map(p=>p.key));
+  const fit=(s,p)=>(FLEX[s]||[s]).includes(p.pos);
+  for(const pass of [0,1])opt.forEach(o=>{if(o.p||(pass===0)===(o.slot==="FLEX"))return;
+    const c=ps.filter(p=>!used.has(p.key)&&!lockedBench.has(p.key)&&!(locked(p)&&!onBye(p)&&!bench.includes(p)&&false)&&fit(o.slot,p)&&okStart(p)&&!(locked(p)&&cur.some(x=>x.p===p))).sort((a,b)=>pts(b)-pts(a));
+    if(c[0]){o.p=c[0];used.add(c[0].key)}});
+  opt.forEach((o,i)=>{if(!o.p&&cur[i].p&&!used.has(cur[i].p.key)){o.p=cur[i].p;o.forced=true;used.add(o.p.key)}});
+  const S=new Set(opt.filter(o=>o.p).map(o=>o.p)),forcedS=new Set(opt.filter(o=>o.forced).map(o=>o.p));
+  const fin=cur.map(c=>({slot:c.slot,p:c.p&&S.has(c.p)?c.p:null}));fin.forEach(f=>{if(forcedS.has(f.p))f.forced=true});
+  const rem=[...S].filter(p=>!fin.some(f=>f.p===p));
+  for(const p of rem){let f=fin.find(f=>!f.p&&fit(f.slot,p));
+    if(!f){const e=fin.find(f=>!f.p);const fx=fin.find(g=>g.slot==="FLEX"&&g.p&&fit(e.slot,g.p)&&!locked(g.p));if(e&&fx){e.p=fx.p;f=fx}else f=e}
+    if(f){f.p=p;f.forced=forcedS.has(p)}}
+  opt.splice(0,opt.length,...fin);
+  const tot=a=>a.reduce((s,x)=>s+(x.p&&okStart(x.p)?pts(x.p):0),0);
+  const changes=[];opt.forEach((o,i)=>{if(o.p!==cur[i].p)changes.push({slot:o.slot,inP:o.p,outP:cur[i].p})});
+  return {cur,opt,bench,changes,curT:tot(cur),optT:tot(opt)};
+}
+function vHome(){const save=lg;let h=`<div class="lgH"><h2>My Leagues</h2><span class="sm">ESPN</span></div>`;
+ for(const [id,l] of Object.entries(D.rosters.leagues).sort((a,b)=>a[0]==="WAN"?-1:1)){lg=id;const x=lineups(),m=l.matchup||{},tot=(m.me||0)+(m.opp_score||0),pct=tot?m.me/tot*100:50;
+  const sg=x.changes.map(c=>`<div class="pr"><div style="font-size:20px">⇅</div><div><div class="nm">Start/Sit: ${esc(c.inP?.name)} over ${esc(c.outP?.name||"empty")}</div><div class="sm up">+${((okStart(c.inP)?pts(c.inP):0)-(c.outP&&okStart(c.outP)?pts(c.outP):0)).toFixed(1)} projected pts</div></div></div>`);
+  const bad=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));bad.forEach(o=>sg.push(`<div class="pr"><div style="font-size:20px">⚠</div><div><div class="nm">No eligible ${o.slot}</div><div class="sm dn">${esc(o.p?.name||"")} can't play. See Moves for a pickup.</div></div></div>`));
+  h+=`<div class="card lc"><div class="lch" onclick="lg='${id}';localStorage.lg=lg;tab='team';render();scrollTo(0,0)"><div class="hel">🏈</div><div><div class="n">${esc(l.name)}</div><div class="sm">ESPN • ${esc(l.place||"")} (${esc(l.wl||"")})</div></div><div style="margin-left:auto;color:var(--mut);font-size:22px">›</div></div>
+  <div class="mu"><div class="tn"><span>${esc(l.my_team)}</span><span>${esc(m.opp||"")}</span></div><div class="sc"><div style="text-align:right"><b>${(m.me??0).toFixed(2)}</b><div class="sm up">${x.optT.toFixed(1)} proj</div></div><div class="vs">vs</div><div><b>${(m.opp_score??0).toFixed(2)}</b><div class="sm">proj n/a</div></div></div>
+  <div class="bar"><div style="flex:${pct};background:var(--grn)"></div><div style="flex:${100-pct};background:var(--mut)"></div></div><div class="sm" style="text-align:center;margin-top:6px">Live scores as of last refresh (${esc(m.as_of||"")}) · bar = current score share, not win probability</div></div>
+  <details class="sg" ${sg.length?"open":""}><summary><span class="cnt" style="${sg.length?"":"background:var(--grn)"}">${sg.length||"✓"}</span>${sg.length?`Week ${D.cur_week} suggestion${sg.length>1?"s":""} available`:"Lineup is optimal"}</summary>${sg.join("")}${x.changes.length?`<button class="big" onclick="lg='${id}';setLineup()">Set Optimal Lineup</button>`:""}</details></div>`}
+ lg=save;return h+`<div class="note">Your-team projection = FantasyPros Week ${D.cur_week} PPR for the optimal lineup. Opponent projections and win probability aren't available without ESPN access, so they're not shown.</div>`}
+function prow(slot,p,extra){if(!p)return `<div class="pr"><div class="slot">${slot}</div><div class="mut">Empty</div></div>`;
+  return `<div class="pr"><div class="slot">${slot}</div><div><div class="nm">${esc(p.name)}${tags(p)}</div><div class="sm">${p.pos} · ${p.team||""} ${onBye(p)?"· bye":esc(p.opp||"")} ${p.wk?.pos_rank?"· "+p.wk.pos_rank:""}</div></div><div class="pts">${p.wk?.pts!=null?p.wk.pts.toFixed(1):'<span class="mut">—</span>'}${extra||""}</div></div>`}
+function lgSwitch(){return `<div class="seg">${Object.entries(D.rosters.leagues).map(([id,l])=>`<button class="${id===lg?"on":""}" onclick="lg='${id}';localStorage.lg=lg;render()">${id==="WAN"?"WAN 2027":"Slopeside"}<div style="font-size:11px;font-weight:600;opacity:.8">${esc(l.my_team)} · ${l.teams_count}-tm</div></button>`).join("")}</div>`}
+function vTeam(){
+  const l=L(),x=lineups();let h=`<button class="lnk" onclick="tab='home';render()">‹ My Playbook</button>`+lgSwitch();
+  h+=`<div class="sum"><div><span class="sm">Record</span><b>${esc((l.record||"").split(" ")[0]||"—")}</b></div><div><span class="sm">Current proj</span><b>${x.curT.toFixed(1)}</b></div><div><span class="sm">Optimal proj</span><b class="${x.optT>x.curT+.05?"up":""}">${x.optT.toFixed(1)}</b></div></div>`;
+  if(x.changes.length){h+=`<div class="ttl">Recommended changes</div><div class="card">${x.changes.map(c=>`<div class="mv"><span class="pill add">IN</span><b>${esc(c.inP?.name||"—")}</b><span class="mut">→ ${c.slot}</span></div><div class="mv" style="margin-bottom:10px"><span class="pill drp">OUT</span>${esc(c.outP?.name||"Empty")}${c.outP?tags(c.outP):""}</div>`).join("")}
+  <button class="big" onclick="setLineup()">Set Optimal Lineup (+${(x.optT-x.curT).toFixed(1)})</button></div>`}
+  else h+=`<div class="card" style="text-align:center"><b class="up">✓ Your lineup is already optimal</b><div class="note">Based on FantasyPros Week ${D.cur_week} PPR projections</div><button class="big off" onclick="setLineup()">Set Optimal Lineup</button></div>`;
+  const forced=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));
+  if(forced.length)h+=`<div class="card" style="border-color:var(--red)"><b class="dn">⚠ No eligible starter for ${forced.map(o=>o.slot).join(", ")}</b><div class="note">${forced.map(o=>esc(o.p?.name||"")).join(", ")} can't play or is locked and nobody on your bench can fill it. Check Moves for a pickup.</div></div>`;
+  h+=`<div class="ttl">Optimized lineup</div><div class="card">${x.opt.map(o=>prow(o.slot,o.p,o.p&&!x.cur.find(c=>c.p===o.p&&c.slot===o.slot)?'<div class="sm up">new</div>':"")).join("")}</div>`;
+  h+=`<div class="ttl">Current ESPN lineup</div><div class="card">${x.cur.map(o=>prow(o.slot,o.p)).join("")}</div>`;
+  h+=`<div class="ttl">Bench</div><div class="card">${x.bench.map(p=>prow("BN",p)).join("")}${(l.ir||[]).map(n=>{const p=myKeys().map(k=>D.byKey[k]).find(q=>q.name===n);return p?prow("IR",p):""}).join("")}</div>`;
+  h+=`<div class="note">Rosters verified on ESPN ${esc(D.rosters.as_of)}. Projections: FantasyPros ECR Week ${D.cur_week} (${esc(D.meta.weekly?.updated)}). Never starts bye, Out, Doubtful or IR players. Locked players (game started) stay put.</div>`;
+  return h}
+function setLineup(){const x=lineups(),l=L();
+  const txt=x.changes.length?`APPROVE ${lg==="WAN"?"WAN":"SLOPESIDE"} (${l.my_team}) LINEUP: `+x.changes.map(c=>`start ${c.inP?.name} at ${c.slot}`+(c.outP?`, bench ${c.outP.name}`:"")).join("; "):`${lg==="WAN"?"WAN":"SLOPESIDE"} (${l.my_team}): verify my lineup matches the optimal lineup, no changes expected`;
+  sheet("Set Optimal Lineup",x.changes.length?`${x.changes.length} change(s), projected +${(x.optT-x.curT).toFixed(1)} pts`:"No changes needed",txt)}
+function vRank(){
+  const P=D.players.filter(p=>p.pos===rk.pos&&(rk.mode==="wk"?p.wk:p.ros?.pos_num)).sort((a,b)=>rk.mode==="wk"?a.wk.rank-b.wk.rank:a.ros.pos_num-b.ros.pos_num);
+  const q=norm(rk.q),list=q?P.filter(p=>norm(p.name).includes(q)):P;
+  let h=lgSwitch()+`<div class="seg"><button class="${rk.mode==="wk"?"on":""}" onclick="rk.mode='wk';render()">Week ${D.cur_week}</button><button class="${rk.mode==="ros"?"on":""}" onclick="rk.mode='ros';render()">Rest of Season</button></div>`;
+  h+=`<div class="chips">${["QB","RB","WR","TE","K","DST"].map(p=>`<button class="${rk.pos===p?"on":""}" onclick="rk.pos='${p}';render()">${p}</button>`).join("")}</div>`;
+  h+=`<input type="search" placeholder="Search players" value="${esc(rk.q)}" oninput="rk.q=this.value;document.getElementById('rl').innerHTML=rankRows()">`;
+  return h+`<div class="card" id="rl">${rankRows()}</div><div class="note">FantasyPros expert consensus, PPR (${rk.mode==="wk"?"weekly "+esc(D.meta.weekly?.updated):"ROS "+esc(D.meta.ros?.updated)}). Badges are for the league selected above.</div>`}
+function rankRows(){const q=norm(rk.q);const P=D.players.filter(p=>p.pos===rk.pos&&(rk.mode==="wk"?p.wk:p.ros?.pos_num)&&(!q||norm(p.name).includes(q))).sort((a,b)=>rk.mode==="wk"?a.wk.rank-b.wk.rank:a.ros.pos_num-b.ros.pos_num).slice(0,q?60:120);
+  if(!P.length)return '<div class="empty">No players found</div>';const me=L().my_team;
+  return P.map(p=>{const o=p.owners?.[lg];const b=o===me?'<span class="own">MINE</span>':o?'<span class="own t">TAKEN</span>':"";
+  return `<div class="pr"><div class="rk">${rk.mode==="wk"?p.wk.rank:p.ros.pos_num}</div><div><div class="nm">${esc(p.name)}${b}${tags(p)}</div><div class="sm">${p.team||""} ${rk.mode==="wk"?esc(p.opp||""):"· Ovr "+(p.ros.overall??"—")}</div></div><div class="pts">${rk.mode==="wk"?(p.wk.pts!=null?p.wk.pts.toFixed(1):"—")+'<div class="sm">proj</div>':(p.ros.pos_rank||"")}</div></div>`}).join("")}
+const fcv=p=>p[L().teams_count===16?"fc16":"fc12"]??null, rtv=p=>p.rt??null;
+function waivers(){const l=L(),mine=myKeys().map(k=>D.byKey[k]),x=lineups(),starters=new Set(x.opt.map(o=>o.p?.key));
+  const unt=new Set(l.untouchable||[]);
+  const drops=mine.filter(p=>!starters.has(p.key)&&!["K","DST"].includes(p.pos)&&!unt.has(p.name)&&!(l.ir||[]).includes(p.name)&&!locked(p));
+  const fa=D.players.filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!(p.owners&&p.owners[lg])&&!p.unranked&&p.ros?.pos_num&&!["O","IR"].includes(status(p))&&fcv(p)!=null);
+  const out=[];
+  fa.sort((a,b)=>fcv(b)-fcv(a)).forEach(a=>{if(out.length>=6)return;
+    const ds=drops.filter(d=>fcv(d)!=null&&!out.some(o=>o.d===d)).sort((p,q)=>fcv(p)-fcv(q));const d=ds[0];if(!d)return;
+    if(fcv(a)<=fcv(d)*1.15)return;
+    const id=`w:${lg}:${a.key}:${d.key}`;if(dis[id])return;out.push({a,d,id})});
+  return out}
+function trades(){const l=L(),me=l.my_team,unt=new Set(lg==="SLOPE"?(l.untouchable||[]):[]),R=D.rosters.resolved[lg]||{};
+  const mine=myKeys().map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!unt.has(p.name)&&!locked(p)&&!["O","IR"].includes(status(p)));
+  const out=[];
+  for(const [team,keys] of Object.entries(R)){if(team===me)continue;const theirs=keys.map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!locked(p));
+    for(const A of mine)for(const B of theirs){const ra=rtv(A),rb=rtv(B),fa=fcv(A),fb=fcv(B);
+      if([ra,rb,fa,fb].some(v=>v==null))continue;const dR=rb-ra,dF=fb-fa;
+      if(dR<0||dF<0||dR>8||dF>fa*.25+150)continue;
+      // why they'd accept
+      const why=[];
+      const posT=theirs.filter(p=>p.pos===A.pos&&p.ros?.pos_num).sort((a,b)=>a.ros.pos_num-b.ros.pos_num);
+      const need={QB:1,RB:2,WR:3,TE:1}[A.pos];
+      if(A.ros?.pos_num&&(posT.length<need||posT[need-1].ros.pos_num>A.ros.pos_num))why.push(`They're thin at ${A.pos}: ${A.name} (ROS ${A.ros.pos_rank}) would be ${posT.length<need?"a needed starter":"an upgrade over "+posT[need-1].name+" ("+posT[need-1].ros.pos_rank+")"}`);
+      const bD=theirs.filter(p=>p.pos===B.pos&&p!==B&&p.ros?.pos_num&&B.ros?.pos_num&&p.ros.pos_num<B.ros.pos_num+12).length;
+      if(B.pos!==A.pos&&bD>={QB:1,RB:2,WR:3,TE:1}[B.pos])why.push(`They have ${bD} other ${B.pos}s ranked near ${B.name}, so they can spare him`);
+      const pa=okStart(A)?pts(A):0,pb=okStart(B)?pts(B):0;if(pa-pb>=2)why.push(`Wins them this week: ${A.name} projects ${pa.toFixed(1)} vs ${B.name} ${pb?pb.toFixed(1):"0 ("+(onBye(B)?"bye":status(B)||"no proj")+")"}`);
+      if(!why.length)continue;
+      const id=`t:${lg}:${A.key}:${B.key}`;if(dis[id])continue;
+      out.push({team,mgr:(l.managers||{})[team]||"",A,B,dR,dF,why,score:why.length*10-dR-dF/200});}}
+  out.sort((a,b)=>b.score-a.score);const seen=new Set(),res=[];
+  for(const t of out){const k=t.A.key+"|"+t.team;if(seen.has(t.A.key+t.B.key)||res.filter(r=>r.A===t.A).length>=2||res.filter(r=>r.team===t.team).length>=2)continue;seen.add(t.A.key+t.B.key);res.push(t);if(res.length>=8)break}
+  return res}
+function vMoves(){const l=L();let h=lgSwitch()+`<div class="seg"><button class="${mvSeg==="w"?"on":""}" onclick="mvSeg='w';render()">Waivers</button><button class="${mvSeg==="t"?"on":""}" onclick="mvSeg='t';render()">Trades</button></div>`;
+  if(mvSeg==="w"){const W=waivers();
+    h+=W.length?W.map((w,i)=>`<div class="card"><div class="sm" style="font-weight:800;color:var(--yel)">PICKUP #${i+1} · VERIFY AVAILABILITY</div>
+    <div class="mv"><span class="pill add">ADD</span><b>${esc(w.a.name)}</b><span class="sm">${w.a.pos} ${w.a.team||""}</span>${tags(w.a)}</div>
+    <div class="mv"><span class="pill drp">DROP</span><b>${esc(w.d.name)}</b><span class="sm">${w.d.pos} ${w.d.team||""}</span>${tags(w.d)}</div>
+    <div class="why">Why: FantasyPros ROS ${w.a.ros.pos_rank} vs ${esc(w.d.name)} ${w.d.ros?.pos_rank||"unranked"}. FantasyCalc ${fmt(fcv(w.a))} vs ${fmt(fcv(w.d))}. Week ${D.cur_week}: ${w.a.wk?.pts!=null&&!onBye(w.a)?w.a.wk.pts.toFixed(1)+" proj":"no proj / bye"}. ${w.a.own!=null?"Rostered in "+Math.round(w.a.own)+"% of FP-synced leagues.":""}</div>
+    <div class="btns"><button class="go" onclick="mkW('${w.id}')">Make Move</button><button class="no" onclick="dismiss('${w.id}')">Dismiss</button></div></div>`).join(""):`<div class="empty">No pickups beat your bench right now.</div>`;
+    h+=`<div class="note">Free agents = players not on any roster loaded for this league${l.partial?" ("+esc(l.partial)+"), so some may be taken: verify on ESPN":""}. Drops never include your starters, kickers/DSTs${lg==="SLOPE"?", Chase Brown or Breece Hall":""}.</div>`}
+  else{const T=trades();
+    h+=T.length?T.map(t=>`<div class="card"><div style="font-weight:800">${esc(t.team)}</div><div class="sm">Manager: ${esc(t.mgr||"unknown")}</div>
+    <div class="mv" style="margin-top:8px"><span class="pill drp">SEND</span><b>${esc(t.A.name)}</b><span class="sm">${t.A.pos} · ROS ${t.A.ros?.pos_rank||"—"}</span>${tags(t.A)}</div>
+    <div class="mv"><span class="pill add">GET</span><b>${esc(t.B.name)}</b><span class="sm">${t.B.pos} · ROS ${t.B.ros?.pos_rank||"—"}</span>${tags(t.B)}</div>
+    <div class="grd"><div>RotoTrade<b class="up">${sgn(t.dR)}</b>${t.A.rt} → ${t.B.rt}</div><div>FantasyCalc<b class="up">${sgn(t.dF)}</b>${fmt(fcv(t.A))} → ${fmt(fcv(t.B))}</div></div>
+    <div class="why"><b>Why they'd accept:</b><br>• ${t.why.map(esc).join("<br>• ")}</div>
+    <div class="btns"><button class="go" onclick='mkT(${JSON.stringify({id:`t:${lg}:${t.A.key}:${t.B.key}`,team:t.team,mgr:t.mgr,a:t.A.name,b:t.B.name,dR:t.dR,dF:t.dF})})'>Make the Move</button><button class="no" onclick="dismiss('t:${lg}:${t.A.key}:${t.B.key}')">Dismiss</button></div></div>`).join(""):`<div class="empty">No trades right now where you're even or ahead on both graders.</div>`;
+    h+=`<div class="note">ROS impact = value you get minus value you send. Only 1-for-1 deals where you're even or ahead on BOTH RotoTrade (seed values ${esc(D.rt_as_of)}, ${Object.keys(D.players.filter(p=>p.rt!=null)).length} players) and FantasyCalc (${L().teams_count}-team PPR redraft). Players without a RotoTrade value are skipped, never guessed. ${lg==="SLOPE"?"Chase Brown and Breece Hall are never offered. ":""}Locked (game started) players are excluded.</div>`}
+  return h}
+function mkW(id){const w=waivers().find(x=>x.id===id),l=L();sheet("Waiver move",`${lg==="WAN"?"WAN 2027":"Slopeside"} · ${l.my_team}. Verify ${w.a.name} is available on ESPN.`,`APPROVE ${lg==="WAN"?"WAN":"SLOPESIDE"} (${l.my_team}): add ${w.a.name} (${w.a.pos} ${w.a.team||""}), drop ${w.d.name}`)}
+function mkT(t){const l=L();sheet("Trade offer",`To ${t.team} (${t.mgr||"manager unknown"}). RotoTrade ${sgn(t.dR)}, FantasyCalc ${sgn(t.dF)} for you.`,`APPROVE ${lg==="WAN"?"WAN":"SLOPESIDE"} (${l.my_team}): send trade offer to ${t.team} (${t.mgr}): I give ${t.a}, I get ${t.b}`)}
+function dismiss(id){dis[id]=Date.now();localStorage.dismissed=JSON.stringify(dis);render()}
+function vNews(){const ids=Object.keys(D.rosters.leagues),seen={};
+  ids.forEach(id=>myKeys(id).forEach(k=>{const p=D.byKey[k];(seen[k]=seen[k]||{p,lg:[],st:null}).lg.push(id);seen[k].st=seen[k].st||status(p,id)}));
+  const all=Object.values(seen),hurt=all.filter(x=>x.st||onBye(x.p)).sort((a,b)=>"O IR D Q".indexOf(b.st||"z")-"O IR D Q".indexOf(a.st||"z"));
+  const names=new Set(all.map(x=>norm(x.p.name)));const mineN=NEWS.filter(n=>names.has(norm(n.player)));
+  const lb=x=>x.lg.map(i=>`<span class="own ${i==="WAN"?"":"t"}">${i==="WAN"?"WAN":"SLOPE"}</span>`).join("");
+  let h=`<div class="ttl">Injuries & byes · your players</div><div class="card">${hurt.map(x=>`<div class="pr"><div><div class="nm">${esc(x.p.name)}${lb(x)}${x.st?`<span class="tag t${x.st}">${x.st}</span>`:""}${onBye(x.p)?'<span class="tag tBYE">BYE</span>':""}</div><div class="sm">${x.p.pos} ${x.p.team||""}${x.p.inj_part?" · "+esc(x.p.inj_part):""}${x.p.inj_note?" · "+esc(x.p.inj_note):""}</div></div></div>`).join("")||'<div class="empty">Everyone healthy</div>'}</div>`;
+  h+=`<div class="ttl">News · your players</div><div class="card">${mineN.map(nw).join("")||'<div class="empty">No recent news on your players yet. The feed fills in as headlines drop.</div>'}</div>`;
+  h+=`<div class="ttl">Latest NFL news</div><div class="card">${NEWS.slice(0,25).map(nw).join("")||'<div class="empty">No news loaded</div>'}</div><div class="note">Statuses: ESPN-verified overrides from ${esc(D.rosters.as_of)}, otherwise Sleeper. News: RotoWire feed.</div>`;
+  return h}
+const nw=n=>`<div class="nw"><div class="h">${esc(n.title)}</div><div class="d">${esc(n.desc)}</div><div class="sm">${esc(n.src)} · ${esc((n.date||"").replace(/:00 (AM|PM)/," $1"))}</div></div>`;
+const QC=["Approve lineup","Who should I start?","Grade this trade","Who should I pick up?","Injury check on my team"];
+function sheet(t,n,p){openGM(p,t+": "+n)}
+function openGM(pre,ctx){$("shN").textContent=ctx||(D?`${lg==="WAN"?"WAN 2027":"Slopeside"} · ${L().my_team}`:"");$("gmT").value=pre||"";
+ $("qc").innerHTML=QC.map(q=>`<button onclick="qcp('${q}')">${q}</button>`).join("");$("cpB").textContent="Send";$("gmS").textContent="No direct line to Grok Bot from the app: Send opens your share sheet (or copies) so you can paste it in your Grok Bot chat. The app never touches ESPN.";drawH();$("sheet").style.display="flex"}
+function qcp(q){const lt=lg==="WAN"?"WAN":"SLOPESIDE";let t=q;if(q==="Approve lineup"&&D){const x=lineups();t=x.changes.length?`APPROVE ${lt} (${L().my_team}) LINEUP: `+x.changes.map(c=>`start ${c.inP?.name} at ${c.slot}`+(c.outP?`, bench ${c.outP.name}`:"")).join("; "):`${lt} (${L().my_team}): check my lineup, app shows it's already optimal`}
+ else t=`${lt} (${D?L().my_team:""}): ${q}${q==="Grade this trade"?" — I give: ___ / I get: ___":""}`;$("gmT").value=t;$("gmT").focus()}
+function drawH(){const h=JSON.parse(localStorage.gmHist||"[]");$("hist").innerHTML=h.slice(-15).map(m=>`<div class="bub">${esc(m.t)}<small>${new Date(m.at).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})} · ${m.via}</small></div>`).join("");$("hist").scrollTop=1e6}
+function closeSheet(){$("sheet").style.display="none"}
+async function sendGM(){const t=$("gmT").value.trim();if(!t)return;let via="copied";
+ const cp=()=>{try{if(navigator.clipboard&&isSecureContext){navigator.clipboard.writeText(t)}else{const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}}catch(e){}};
+ if(navigator.share){try{await navigator.share({text:t});via="shared"}catch(e){if(e.name==="AbortError")return;cp()}}else cp();
+ const h=JSON.parse(localStorage.gmHist||"[]");h.push({t,at:Date.now(),via});localStorage.gmHist=JSON.stringify(h.slice(-50));
+ $("gmT").value="";drawH();$("cpB").textContent=via==="shared"?"Shared ✓":"Copied ✓";$("gmS").innerHTML=via==="shared"?"<b>Shared. Make sure it lands in your Grok Bot chat.</b>":"<b>Copied, paste it in your Grok Bot chat.</b>"}
+function render(){$("tabs").innerHTML=TABS.map(([id,ic,lab])=>`<button class="${tab===id||(tab==="team"&&id==="home")?"on":""}" onclick="tab='${id}';localStorage.tab=tab;render();scrollTo(0,0)"><i>${ic}</i>${lab}</button>`).join("");
+  if(!D)return;try{$("main").innerHTML={home:vHome,team:vTeam,rank:vRank,moves:vMoves,news:vNews}[tab]()}catch(e){$("main").innerHTML=`<div class="card dn">Error: ${esc(e.message)}</div>`;console.error(e)}}
+render();load().catch(e=>{$("main").innerHTML='<div class="empty">Couldn\'t load data. Tap Refresh.</div>'});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");
+</script></body></html>

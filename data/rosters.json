@@ -180,7 +180,21 @@
     "BBB Inc.": ""
    },
    "partial": "9 of 12 teams loaded (BBB Inc. partial \u2014 Winston only)",
-   "notes": "Record 0-5 (12th). Live ESPN verified 2026-10-16. Lamar Q; Evans Q; Hall Doubtful; Brown/Goff/Gordon on bye Wk6."
+   "notes": "Record 0-5 (12th). Live ESPN verified 2026-10-16. Lamar Q; Evans Q; Hall Doubtful; Brown/Goff/Gordon on bye Wk6.",
+   "espn_status": {
+    "Lamar Jackson": "Q",
+    "Mike Evans": "Q",
+    "Breece Hall": "D"
+   },
+   "record": "0-5 (12th of 12)",
+   "place": "12th Place",
+   "wl": "0-5",
+   "matchup": {
+    "me": 6.0,
+    "opp": "Can't Touch This",
+    "opp_score": 4.48,
+    "as_of": "2026-10-16"
+   }
   },
   "SLOPE": {
    "name": "Slopeside",
@@ -519,6 +533,24 @@
     "Pb": "patt rick",
     "Ian's Inspiring Team": "Ian Creegan",
     "Fasterthanurmom": "Emily Tine"
+   },
+   "espn_status": {
+    "Breece Hall": "D",
+    "Jalen Hurts": "O",
+    "Adonai Mitchell": "D"
+   },
+   "record": "2-3 (10th of 16)",
+   "untouchable": [
+    "Chase Brown",
+    "Breece Hall"
+   ],
+   "place": "10th Place",
+   "wl": "2-3",
+   "matchup": {
+    "me": 14.6,
+    "opp": "Jacob's Legal Defense",
+    "opp_score": 25.4,
+    "as_of": "2026-10-16"
    }
   }
  },
