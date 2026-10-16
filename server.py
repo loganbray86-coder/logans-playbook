@@ -123,9 +123,22 @@ def sleeper():
         for p in raw.values():
             if not p.get("full_name") or p.get("position") not in ("QB", "RB", "WR", "TE", "K"): continue
             if not p.get("team"): continue
-            slim[norm(p["full_name"]) + "|" + p["position"]] = {k: p.get(k) for k in ("injury_status", "injury_body_part", "injury_notes", "status", "team", "news_updated", "depth_chart_order")}
+            slim[norm(p["full_name"]) + "|" + p["position"]] = {k: p.get(k) for k in ("injury_status", "injury_body_part", "injury_notes", "status", "team", "news_updated", "depth_chart_order", "espn_id")}
         json.dump(slim, open(path, "w")); return slim
     return cached("sleeper", public_ttl(), f)
+
+def espn_ids():
+    def f():
+        r = requests.get("https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/%d/players?view=players_wl" % time.gmtime().tm_year,
+                         headers={**UA, "X-Fantasy-Filter": '{"filterActive":{"value":true}}'}, timeout=30).json()
+        pm = {1: "QB", 2: "RB", 3: "WR", 4: "TE", 5: "K"}
+        out = {}
+        for p in r:
+            pos = pm.get(p.get("defaultPositionId"))
+            if pos and p.get("fullName"):
+                out[norm(p["fullName"]) + "|" + pos] = {"id": p["id"], "own": (p.get("ownership") or {}).get("percentOwned")}
+        return out
+    return cached("espn_ids", 21600, f)
 
 def rototrade():
     d = json.load(open(os.path.join(BASE, "data", "rototrade.json")))
@@ -190,7 +203,15 @@ def build():
     for e in players.values():
         s = sl.get(norm(e["name"]) + "|" + str(e["pos"]))
         if s:
+            if s.get("espn_id"): e["espn_id"] = s.get("espn_id")
             e["inj"] = s.get("injury_status"); e["inj_part"] = s.get("injury_body_part"); e["inj_note"] = s.get("injury_notes")
+    try: eids = espn_ids() or {}
+    except Exception: eids = {}
+    for e in players.values():
+        x = eids.get(norm(e["name"]) + "|" + str(e["pos"]))
+        if x:
+            e["espn_id"] = x["id"]
+            if x.get("own") is not None: e["espn_own"] = round(x["own"], 1)
     nmap = {norm(e["name"]): e["name"] for e in players.values()}
     for e in players.values():
         if e["pos"] == "RB" and e.get("team"):
