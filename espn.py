@@ -106,7 +106,10 @@ def convert(lkey, d, base):
                         "me_proj": pj(us), "opp_proj": pj(them), "week": mp, "as_of": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())}
     # pending transactions
     pend = []
-    for tx in d.get("transactions", []) or []:
+    seen = set()
+    for tx in (d.get("transactions") or []) + (d.get("pendingTransactions") or []):
+        if tx.get("id") in seen: continue
+        seen.add(tx.get("id"))
         if tx.get("status") not in ("PENDING", "PROPOSED"): continue
         items = tx.get("items", [])
         nm = lambda pid: players.get(pid, {}).get("name", "Player %s" % pid)
