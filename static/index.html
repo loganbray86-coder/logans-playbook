@@ -75,14 +75,32 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const norm=n=>String(n).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[.'`]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").split(/\s+/).filter(Boolean).join(" ");
 const fmt=n=>n==null?"n/a":Math.round(n).toLocaleString();
 const sgn=n=>n==null?"n/a":(n>0?"+":"")+(Math.abs(n)>=100?Math.round(n).toLocaleString():(Math.round(n*10)/10));
+function ago(ts){
+  if(!ts)return "";
+  const m=Math.max(0,Math.floor((Date.now()-ts*1000)/60000));
+  if(m<1)return "just now";
+  if(m===1)return "1 min ago";
+  if(m<60)return m+" min ago";
+  const h=Math.floor(m/60);return h===1?"1h ago":h+"h ago";
+}
+function setUpd(){
+  if(!D||!D.built){$("upd").textContent="Loading…";return}
+  $("upd").textContent="Updated "+ago(D.built)+" · Week "+D.cur_week;
+}
+let _loading=false;
 async function load(force){
-  const [d,n]=await Promise.all([fetch("/api/data").then(r=>r.json()),fetch("/api/news").then(r=>r.json()).catch(()=>({items:[]}))]);
-  D=d;NEWS=n.items||[];D.byKey={};D.players.forEach(p=>D.byKey[p.key]=p);
-  $("upd").textContent="Updated "+new Date(D.built*1000).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+" · Week "+D.cur_week;render();
+  if(_loading)return;_loading=true;
+  try{
+    const q=force?"?refresh=1":"";
+    const [d,n]=await Promise.all([fetch("/api/data"+q).then(r=>r.json()),fetch("/api/news").then(r=>r.json()).catch(()=>({items:[]}))]);
+    D=d;NEWS=n.items||[];D.byKey={};D.players.forEach(p=>D.byKey[p.key]=p);
+    setUpd();render();
+  }finally{_loading=false}
 }
 async function refresh(){const b=$("rf");b.classList.add("spin");b.disabled=true;$("upd").textContent="Refreshing FantasyPros, FantasyCalc, Sleeper, schedule, news…";
   try{const r=await fetch("/api/refresh",{method:"POST"});if(!r.ok)throw 0;await load();}catch(e){$("upd").textContent="Refresh failed; showing last data";}
   b.classList.remove("spin");b.disabled=false;}
+async function softRefresh(){try{await load()}catch(e){/* keep showing last */}}
 function L(){return D.rosters.leagues[lg]}
 function myKeys(id){const l=D.rosters.leagues[id||lg];return (D.rosters.resolved[id||lg]||{})[l.my_team]||[]}
 function status(p,id){const l=D.rosters.leagues[id||lg];const o=(l.espn_status||{})[p.name];if(o)return o;
@@ -239,5 +257,11 @@ async function sendGM(){const t=$("gmT").value.trim();if(!t)return;let via="copi
 function render(){$("tabs").innerHTML=TABS.map(([id,ic,lab])=>`<button class="${tab===id||(tab==="team"&&id==="home")?"on":""}" onclick="tab='${id}';localStorage.tab=tab;render();scrollTo(0,0)"><i>${ic}</i>${lab}</button>`).join("");
   if(!D)return;try{$("main").innerHTML={home:vHome,team:vTeam,rank:vRank,moves:vMoves,news:vNews}[tab]()}catch(e){$("main").innerHTML=`<div class="card dn">Error: ${esc(e.message)}</div>`;console.error(e)}}
 render();load().catch(e=>{$("main").innerHTML='<div class="empty">Couldn\'t load data. Tap Refresh.</div>'});
-if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")softRefresh()});
+window.addEventListener("focus",()=>softRefresh());
+setInterval(()=>{if(document.visibilityState==="visible")softRefresh()},5*60*1000);
+setInterval(setUpd,30*1000);
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").then(reg=>{
+  if(reg&&reg.update)reg.update();
+}).catch(()=>{});
 </script></body></html>

@@ -71,7 +71,7 @@ def grade(rank, n=32):
 
 def schedule(cur, last=17):
     p = os.path.join(C, "sched.json")
-    if os.path.exists(p) and time.time() - os.path.getmtime(p) < 21600:
+    if os.path.exists(p) and time.time() - os.path.getmtime(p) < 900:
         return json.load(open(p))
     out = defaultdict(dict)
     for w in range(cur, last + 1):

@@ -7,21 +7,88 @@ UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, 
 app = Flask(__name__, static_folder=os.path.join(BASE, "static"))
 os.makedirs(os.path.join(BASE, "cache"), exist_ok=True)
 _cache, _lock = {}, threading.Lock()
+_refreshing = set()
+_refresh_depth = threading.local()
 STATUS = {}
 
-def cached(key, ttl, fn):
+def in_nfl_window():
+    """Thu/Sun/Mon NFL game windows in US/Eastern."""
+    try:
+        from zoneinfo import ZoneInfo
+        now = __import__("datetime").datetime.now(ZoneInfo("America/New_York"))
+    except Exception:
+        from datetime import datetime, timedelta, timezone
+        now = datetime.now(timezone.utc) - timedelta(hours=4)
+    wd, h = now.weekday(), now.hour
+    if wd == 6:  # Sunday ~12:00–23:59 ET
+        return 12 <= h <= 23
+    if wd in (0, 3):  # Mon / Thu night games ~19:00–23:59 ET
+        return 19 <= h <= 23
+    return False
+
+def public_ttl(kind="default"):
+    """15 min normally; 5 min for scores/news during NFL game windows."""
+    if kind in ("scores", "news") and in_nfl_window():
+        return 300
+    return 900
+
+def _stamp():
+    return time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())
+
+def _store(key, v, ok=True, error=None):
     now = time.time()
     with _lock:
-        c = _cache.get(key)
-        if c and now - c[0] < ttl: return c[1]
-    try:
-        v = fn(); STATUS[key] = {"ok": True, "fetched": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())}
-    except Exception as e:
-        STATUS[key] = {"ok": False, "error": str(e)[:200], "fetched": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())}
-        if c: return c[1]
-        return None
-    with _lock: _cache[key] = (now, v)
+        _cache[key] = (now, v)
+        _refreshing.discard(key)
+    st = {"ok": ok, "fetched": _stamp()}
+    if error: st["error"] = error
+    STATUS[key] = st
     return v
+
+def _run_refresh(key, fn):
+    """Blocking refresh. Nested cached() calls also block so a bg rebuild gets fresh sources."""
+    prev = getattr(_refresh_depth, "on", False)
+    _refresh_depth.on = True
+    try:
+        try:
+            v = fn()
+            return _store(key, v, True)
+        except Exception as e:
+            with _lock:
+                stale = _cache.get(key)
+                _refreshing.discard(key)
+            STATUS[key] = {"ok": False, "error": str(e)[:200], "fetched": _stamp()}
+            return stale[1] if stale else None
+    finally:
+        _refresh_depth.on = prev
+
+def cached(key, ttl, fn):
+    """Return cached value. If expired, serve stale and refresh in a background thread.
+    Inside a refresh (thread-local), always fetch fresh so nested sources are not stale."""
+    now = time.time()
+    blocking = getattr(_refresh_depth, "on", False)
+    with _lock:
+        c = _cache.get(key)
+        if c and now - c[0] < ttl and not blocking:
+            return c[1]
+        if c and now - c[0] < ttl and blocking:
+            return c[1]  # still fresh — no need to refetch
+        stale = c[1] if c else None
+        already = key in _refreshing
+        if stale is not None and not already and not blocking:
+            _refreshing.add(key)
+            kick = True
+        elif not already:
+            _refreshing.add(key)
+            kick = False
+        else:
+            kick = False
+    if stale is not None and not blocking:
+        if kick:
+            threading.Thread(target=_run_refresh, args=(key, fn), daemon=True).start()
+        return stale
+    # No stale, or we are inside a refresh — block for fresh data
+    return _run_refresh(key, fn)
 
 def norm(n):
     n = unicodedata.normalize("NFKD", n).encode("ascii", "ignore").decode().lower()
@@ -39,16 +106,16 @@ def fp_page(page):
         i = t.index("var ecrData = ") + 14
         d, _ = json.JSONDecoder().raw_decode(t[i:])
         return d
-    return cached("fp:" + page, 3600, f)
+    return cached("fp:" + page, public_ttl(), f)
 
 def fc(teams):
-    return cached(f"fc{teams}", 3600, lambda: requests.get(
+    return cached(f"fc{teams}", public_ttl(), lambda: requests.get(
         f"https://api.fantasycalc.com/values/current?isDynasty=false&numQbs=1&numTeams={teams}&ppr=1", headers=UA, timeout=20).json())
 
 def sleeper():
     path = os.path.join(BASE, "cache", "sleeper_slim.json")
     def f():
-        if os.path.exists(path) and time.time() - os.path.getmtime(path) < 86400:
+        if os.path.exists(path) and time.time() - os.path.getmtime(path) < public_ttl():
             return json.load(open(path))
         raw = requests.get("https://api.sleeper.app/v1/players/nfl", timeout=60).json()
         slim = {}
@@ -57,7 +124,7 @@ def sleeper():
             if not p.get("team"): continue
             slim[norm(p["full_name"]) + "|" + p["position"]] = {k: p.get(k) for k in ("injury_status", "injury_body_part", "injury_notes", "status", "team", "news_updated", "depth_chart_order")}
         json.dump(slim, open(path, "w")); return slim
-    return cached("sleeper", 86400, f)
+    return cached("sleeper", public_ttl(), f)
 
 def rototrade():
     d = json.load(open(os.path.join(BASE, "data", "rototrade.json")))
@@ -150,7 +217,7 @@ def build():
         for e in players.values():
             a = advd["players"].get(norm(e["name"]) + "|" + str(e["pos"]))
             if a: e["adv"] = a
-        sched = cached("sched", 21600, lambda: ADV.schedule(cur))
+        sched = cached("sched", public_ttl(), lambda: ADV.schedule(cur))
         extra = {"team_stats": advd["teams"], "adv_season": advd["season"], "adv_thru": advd["thru_week"], "fpa": advd["fpa"]}
         if sched:
             extra["sched"] = sched; extra["sos"] = ADV.sos(sched, advd["fpa"], cur)
@@ -159,7 +226,7 @@ def build():
 
 @app.route("/api/data")
 def api_data():
-    return jsonify(cached("build", 600, build) if not request.args.get("refresh") else build())
+    return jsonify(cached("build", public_ttl(), build) if not request.args.get("refresh") else build())
 
 @app.route("/api/scoreboard")
 def api_scoreboard():
@@ -174,7 +241,7 @@ def api_scoreboard():
             out.append({"id": ev["id"], "date": ev["date"], "status": ev["status"]["type"]["shortDetail"], "state": ev["status"]["type"]["state"],
                         "teams": teams, "broadcast": ",".join(b for x in comp.get("broadcasts", []) for b in x.get("names", []))})
         return {"week": d.get("week", {}).get("number"), "games": out}
-    return jsonify(cached("espn", 60, f) or {"games": [], "error": STATUS.get("espn")})
+    return jsonify(cached("espn", public_ttl("scores"), f) or {"games": [], "error": STATUS.get("espn")})
 
 NEWS_PATH = os.path.join(BASE, "cache", "news.json")
 def news():
@@ -190,7 +257,7 @@ def news():
             old.append({"id": g, "player": t.split(":")[0].strip(), "title": t, "desc": (it.findtext("description") or "").split("Visit RotoWire")[0].strip(),
                         "link": it.findtext("link"), "date": it.findtext("pubDate"), "src": "RotoWire"})
         old = old[-400:]; json.dump(old, open(NEWS_PATH, "w")); return old
-    return cached("news", 300, f)
+    return cached("news", public_ttl("news"), f)
 
 @app.route("/api/news")
 def api_news(): return jsonify({"items": list(reversed(news() or [])), "status": STATUS.get("news")})
@@ -213,7 +280,7 @@ def api_status(): return jsonify(STATUS)
 def api_docs():
     return """<html><body style="background:#0b0f17;color:#e8edf5;font-family:sans-serif;padding:20px;max-width:800px">
 <h1>Logan's Playbook JSON API</h1><p>All read-only GET endpoints. Nothing here touches ESPN.</p>
-<h3>GET /api/data</h3><p>Everything the app uses. Add <code>?refresh=1</code> to rebuild now (otherwise cached 10 min; sources cached 1 h, Sleeper and nflverse daily/6 h).</p>
+<h3>GET /api/data</h3><p>Everything the app uses. Add <code>?refresh=1</code> to force a blocking rebuild. Otherwise public sources (FantasyPros, FantasyCalc, Sleeper, schedule, news, build) use a 15 min TTL (5 min for scores/news during Thu/Sun/Mon NFL windows). Expired cache is served immediately and refreshed in a background thread. nflverse adv stays ~6 h.</p>
 <ul><li><b>players[]</b>: key, name, pos, team, bye, opp, own (FP avg roster %), wk {rank,pos_rank,pts (FP PPR projection),best,worst,avg,std,grade,delta}, ros {overall,pos_rank,pos_num,...}, rt (RotoTrade seed), fc12/fc16 (FantasyCalc), inj/inj_part/inj_note (Sleeper), adv {g,ppg,tgt_g,ts,ay_g,touch_g,snap,last3[],trend,trend_val,tot{}} (nflverse), cuff (Sleeper depth chart RB2), owners {WAN|SLOPE: team}</li>
 <li><b>fpa</b>: {pos:{team:{fpa,rank}}} PPR points allowed per game (rank 32 = most allowed)</li><li><b>sched</b>: {team:{week:"vs OPP"|"@OPP"}} weeks cur..17 from ESPN</li>
 <li><b>sos</b>: {team:{pos:{ros|wan_po|slope_po:{avg_rank,grade}}}}</li><li><b>team_stats</b>: {team:{off_ppg,give_g}}</li>
