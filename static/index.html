@@ -68,6 +68,7 @@ html.light .pr{border-color:#ebeef4}html.light .chips button{border-color:#e2e7e
 <script>
 const TABS=[["home","📋","Playbook"],["moves","⇄","Moves"],["rank","☷","Rankings"],["news","📰","News"]];if(localStorage.theme!=="dark")document.documentElement.classList.add("light");function theme(){const c=document.documentElement.classList.toggle("light");localStorage.theme=c?"light":"dark";document.querySelector("meta[name=theme-color]").content=c?"#ffffff":"#0d1117"}
 let D=null,NEWS=[],tab=["home","moves","rank","news","team"].includes(localStorage.tab)?localStorage.tab:"home",lg=localStorage.lg||"WAN",rk={mode:"wk",pos:"RB",q:""},mvSeg="w";
+{const q=new URLSearchParams(location.search);if(q.get("tab"))tab=q.get("tab");if(q.get("seg"))mvSeg=q.get("seg");if(q.get("lg"))lg=q.get("lg")}
 const dis=JSON.parse(localStorage.dismissed||"{}");
 const $=s=>document.getElementById(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -87,6 +88,7 @@ function myKeys(id){const l=D.rosters.leagues[id||lg];return (D.rosters.resolved
 function status(p,id){const l=D.rosters.leagues[id||lg];const o=(l.espn_status||{})[p.name];if(o)return o;
   if((l.ir||[]).includes(p.name))return "IR";const m={Questionable:"Q",Doubtful:"D",Out:"O",IR:"IR",PUP:"IR",Sus:"O"};return m[p.inj]||null}
 const onBye=p=>String(p.bye)===String(D.cur_week);
+const noProj=p=>!(p.wk&&p.wk.pts!=null);
 const pts=p=>p.wk&&p.wk.pts!=null?p.wk.pts:0;
 const locked=p=>p.game_status&&p.game_status!=="scheduled"||(p.kickoff&&p.kickoff*1000<Date.now());
 const okStart=(p,id)=>!onBye(p)&&!["O","D","IR"].includes(status(p,id));
@@ -96,7 +98,7 @@ function lineups(){
   const l=L(),slots=l.slots,keys=myKeys().filter(k=>!(l.ir||[]).includes(D.byKey[k].name)),ps=keys.map(k=>D.byKey[k]);
   const cur=slots.map((s,i)=>({slot:s,p:ps[i]})),bench=ps.slice(slots.length);
   const opt=slots.map(s=>({slot:s,p:null}));const used=new Set();
-  cur.forEach((c,i)=>{if(c.p&&locked(c.p)&&!onBye(c.p)){opt[i].p=c.p;used.add(c.p.key)}});
+  cur.forEach((c,i)=>{if(c.p&&!onBye(c.p)&&(locked(c.p)||(noProj(c.p)&&status(c.p)==='Q'&&!ps.some(q=>q!==c.p&&q.pos===c.p.pos&&okStart(q)&&!noProj(q)&&!cur.some(x=>x.p===q))))){opt[i].p=c.p;used.add(c.p.key)}});
   const lockedBench=new Set(bench.filter(p=>locked(p)).map(p=>p.key));
   const fit=(s,p)=>(FLEX[s]||[s]).includes(p.pos);
   for(const pass of [0,1])opt.forEach(o=>{if(o.p||(pass===0)===(o.slot==="FLEX"))return;
@@ -124,7 +126,7 @@ function vHome(){const save=lg;let h=`<div class="lgH"><h2>My Leagues</h2><span 
   <details class="sg" ${sg.length?"open":""}><summary><span class="cnt" style="${sg.length?"":"background:var(--grn)"}">${sg.length||"✓"}</span>${sg.length?`Week ${D.cur_week} suggestion${sg.length>1?"s":""} available`:"Lineup is optimal"}</summary>${sg.join("")}${x.changes.length?`<button class="big" onclick="lg='${id}';setLineup()">Set Optimal Lineup</button>`:""}</details></div>`}
  lg=save;return h+`<div class="note">Your-team projection = FantasyPros Week ${D.cur_week} PPR for the optimal lineup. Opponent projections and win probability aren't available without ESPN access, so they're not shown.</div>`}
 function prow(slot,p,extra){if(!p)return `<div class="pr"><div class="slot">${slot}</div><div class="mut">Empty</div></div>`;
-  return `<div class="pr"><div class="slot">${slot}</div><div><div class="nm">${esc(p.name)}${tags(p)}</div><div class="sm">${p.pos} · ${p.team||""} ${onBye(p)?"· bye":esc(p.opp||"")} ${p.wk?.pos_rank?"· "+p.wk.pos_rank:""}</div></div><div class="pts">${p.wk?.pts!=null?p.wk.pts.toFixed(1):'<span class="mut">—</span>'}${extra||""}</div></div>`}
+  return `<div class="pr"><div class="slot">${slot}</div><div><div class="nm">${esc(p.name)}${tags(p)}</div><div class="sm">${p.pos} · ${p.team||""} ${onBye(p)?"· bye":esc(p.opp||"")} ${p.wk?.pos_rank?"· "+p.wk.pos_rank:""}</div></div><div class="pts">${p.wk?.pts!=null?p.wk.pts.toFixed(1):'<span class="mut" style="font-size:11px">'+(onBye(p)?'bye':'no projection'+(status(p)?' ('+status(p)+')':''))+'</span>'}${extra||""}</div></div>`}
 function lgSwitch(){return `<div class="seg">${Object.entries(D.rosters.leagues).map(([id,l])=>`<button class="${id===lg?"on":""}" onclick="lg='${id}';localStorage.lg=lg;render()">${id==="WAN"?"WAN 2027":"Slopeside"}<div style="font-size:11px;font-weight:600;opacity:.8">${esc(l.my_team)} · ${l.teams_count}-tm</div></button>`).join("")}</div>`}
 function vTeam(){
   const l=L(),x=lineups();let h=`<button class="lnk" onclick="tab='home';render()">‹ My Playbook</button>`+lgSwitch();
@@ -155,21 +157,27 @@ function rankRows(){const q=norm(rk.q);const P=D.players.filter(p=>p.pos===rk.po
   return `<div class="pr"><div class="rk">${rk.mode==="wk"?p.wk.rank:p.ros.pos_num}</div><div><div class="nm">${esc(p.name)}${b}${tags(p)}</div><div class="sm">${p.team||""} ${rk.mode==="wk"?esc(p.opp||""):"· Ovr "+(p.ros.overall??"—")}</div></div><div class="pts">${rk.mode==="wk"?(p.wk.pts!=null?p.wk.pts.toFixed(1):"—")+'<div class="sm">proj</div>':(p.ros.pos_rank||"")}</div></div>`}).join("")}
 const fcv=p=>p[L().teams_count===16?"fc16":"fc12"]??null, rtv=p=>p.rt??null;
 function waivers(){const l=L(),mine=myKeys().map(k=>D.byKey[k]),x=lineups(),starters=new Set(x.opt.map(o=>o.p?.key));
-  const unt=new Set(l.untouchable||[]);
-  const drops=mine.filter(p=>!starters.has(p.key)&&!["K","DST"].includes(p.pos)&&!unt.has(p.name)&&!(l.ir||[]).includes(p.name)&&!locked(p));
-  const fa=D.players.filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!(p.owners&&p.owners[lg])&&!p.unranked&&p.ros?.pos_num&&!["O","IR"].includes(status(p))&&fcv(p)!=null);
+  const unt=new Set(l.untouchable||[]),pend=l.pending||[],pAdd=new Set(pend.map(q=>q.add)),pDrop=new Set(pend.map(q=>q.drop));
+  const need={QB:1,RB:2,WR:l.slots.filter(s=>s==="WR").length,TE:1},cnt=q=>mine.filter(p=>p.pos===q&&!pDrop.has(p.name)).length+[...pAdd].filter(n=>D.players.find(p=>p.name===n)?.pos===q).length;
+  const surplus=q=>cnt(q)>=need[q]*2+1;
+  const rk=p=>p?.ros?.overall??9999;
+  const drops=mine.filter(p=>!starters.has(p.key)&&!["K","DST"].includes(p.pos)&&!unt.has(p.name)&&!pDrop.has(p.name)&&!(l.ir||[]).includes(p.name)&&!locked(p));
+  const fa=D.players.filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!(p.owners&&p.owners[lg])&&!pAdd.has(p.name)&&!p.unranked&&p.ros?.pos_num&&!["O","IR"].includes(status(p))&&!(p.own!=null?p.own>60:(p.ros.overall??999)<=100));
+  // need weight: thin positions (<= starters+1) get priority
+  const thin=q=>cnt(q)<=need[q]+1;
+  fa.sort((a,b)=>(rk(a)-(thin(a.pos)?40:0))-(rk(b)-(thin(b.pos)?40:0))||(fcv(b)??0)-(fcv(a)??0));
   const out=[];
-  fa.sort((a,b)=>fcv(b)-fcv(a)).forEach(a=>{if(out.length>=6)return;
-    const ds=drops.filter(d=>fcv(d)!=null&&!out.some(o=>o.d===d)).sort((p,q)=>fcv(p)-fcv(q));const d=ds[0];if(!d)return;
-    if(fcv(a)<=fcv(d)*1.15)return;
+  fa.forEach(a=>{if(out.length>=6)return;
+    const ds=drops.filter(d=>!out.some(o=>o.d===d)&&(d.pos===a.pos||surplus(d.pos))&&!(a.pos==="QB"&&d.pos!=="QB"&&cnt("QB")>=2)).filter(d=>rk(d)>rk(a)+15).sort((p,q)=>(p.pos===a.pos?0:1)-(q.pos===a.pos?0:1)||rk(q)-rk(p));
+    const d=ds[0];if(!d)return;
     const id=`w:${lg}:${a.key}:${d.key}`;if(dis[id])return;out.push({a,d,id})});
   return out}
-function trades(){const l=L(),me=l.my_team,unt=new Set(lg==="SLOPE"?(l.untouchable||[]):[]),R=D.rosters.resolved[lg]||{};
-  const mine=myKeys().map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!unt.has(p.name)&&!locked(p)&&!["O","IR"].includes(status(p)));
+function trades(){const l=L(),me=l.my_team,unt=new Set(l.untouchable||[]),blk=new Set((l.blocked_trades||[]).map(b=>b.join('|'))),R=D.rosters.resolved[lg]||{};
+  const mine=myKeys().map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!unt.has(p.name)&&!locked(p)&&!onBye(p)&&!["O","IR","D"].includes(status(p)));
   const out=[];
-  for(const [team,keys] of Object.entries(R)){if(team===me)continue;const theirs=keys.map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!locked(p));
+  for(const [team,keys] of Object.entries(R)){if(team===me)continue;const theirs=keys.map(k=>D.byKey[k]).filter(p=>["QB","RB","WR","TE"].includes(p.pos)&&!locked(p)&&!status(p,lg));
     for(const A of mine)for(const B of theirs){const ra=rtv(A),rb=rtv(B),fa=fcv(A),fb=fcv(B);
-      if([ra,rb,fa,fb].some(v=>v==null))continue;const dR=rb-ra,dF=fb-fa;
+      if([ra,rb,fa,fb].some(v=>v==null)||blk.has(A.name+'|'+B.name))continue;const dR=rb-ra,dF=fb-fa;
       if(dR<0||dF<0||dR>8||dF>fa*.25+150)continue;
       // why they'd accept
       const why=[];

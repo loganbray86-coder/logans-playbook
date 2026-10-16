@@ -194,7 +194,29 @@
     "opp": "Can't Touch This",
     "opp_score": 4.48,
     "as_of": "2026-10-16"
-   }
+   },
+   "untouchable": [
+    "Breece Hall",
+    "Chase Brown"
+   ],
+   "blocked_trades": [
+    [
+     "Chase Brown",
+     "Trey McBride"
+    ],
+    [
+     "Breece Hall",
+     "Ty'Son McMillan"
+    ],
+    [
+     "Breece Hall",
+     "Tetairoa McMillan"
+    ],
+    [
+     "Jared Goff",
+     "Quinshon Judkins"
+    ]
+   ]
   },
   "SLOPE": {
    "name": "Slopeside",
@@ -541,8 +563,8 @@
    },
    "record": "2-3 (10th of 16)",
    "untouchable": [
-    "Chase Brown",
-    "Breece Hall"
+    "Breece Hall",
+    "Chase Brown"
    ],
    "place": "10th Place",
    "wl": "2-3",
@@ -551,7 +573,16 @@
     "opp": "Jacob's Legal Defense",
     "opp_score": 25.4,
     "as_of": "2026-10-16"
-   }
+   },
+   "pending": [
+    {
+     "type": "waiver",
+     "add": "Dameon Pierce",
+     "drop": "Samaje Perine",
+     "status": "pending",
+     "as_of": "2026-10-16"
+    }
+   ]
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
