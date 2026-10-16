@@ -1,6 +1,7 @@
 import json, re, time, os, threading, unicodedata
 import requests
 import adv as ADV
+import espn as ESPN
 from flask import Flask, jsonify, send_from_directory, request
 BASE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
@@ -131,7 +132,9 @@ def rototrade():
     STATUS["rototrade"] = {"ok": True, "fetched": "seed file, as of " + d["as_of"], "note": d.get("source")}
     return d
 
-def rosters(): return json.load(open(os.path.join(BASE, "data", "rosters.json")))
+def rosters_file(): return json.load(open(os.path.join(BASE, "data", "rosters.json")))
+def espn_ttl(): return 60 if in_nfl_window() else 120
+def rosters(): return ESPN.live_rosters(rosters_file(), cached, espn_ttl())
 
 def build():
     players = {}
@@ -226,7 +229,7 @@ def build():
 
 @app.route("/api/data")
 def api_data():
-    return jsonify(cached("build", public_ttl(), build) if not request.args.get("refresh") else build())
+    return jsonify(cached("build", espn_ttl() if ESPN.creds() else public_ttl(), build) if not request.args.get("refresh") else build())
 
 @app.route("/api/scoreboard")
 def api_scoreboard():
