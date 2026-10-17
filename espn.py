@@ -40,7 +40,7 @@ def convert(lkey, d, base):
     lid, myid = LEAGUES[lkey]
     L = copy.deepcopy(base or {})
     members = {m["id"]: ("%s %s" % (m.get("firstName", ""), m.get("lastName", ""))).strip() or m.get("displayName", "") for m in d.get("members", [])}
-    teams, byid, mgrs, players = {}, {}, {}, {}
+    teams, byid, mgrs, players, pids = {}, {}, {}, {}, {}
     period = d.get("scoringPeriodId") or d.get("status", {}).get("currentMatchupPeriod")
     for t in d.get("teams", []):
         n = tname(t); byid[t["id"]] = n
@@ -49,7 +49,7 @@ def convert(lkey, d, base):
         lst = []
         for e in ents:
             nm, p, pos = pname(e); pid = p.get("id")
-            players[pid] = {"name": nm, "pos": pos, "team": PRO.get(p.get("proTeamId"), "FA")}
+            players[pid] = {"name": nm, "pos": pos, "team": PRO.get(p.get("proTeamId"), "FA")}; pids[nm] = pid
             lst.append((e.get("lineupSlotId"), nm, p, pos))
         teams[t["id"]] = lst
     me = teams.get(myid, [])
@@ -123,6 +123,21 @@ def convert(lkey, d, base):
             drop = next((nm(i["playerId"]) for i in items if i.get("type") == "DROP"), None)
             pend.append({"type": "waiver", "add": add, "drop": drop, "status": "pending", "bid": tx.get("bidAmount")})
     L["pending"] = pend
+    L["pids"] = pids
+    # waiver settings (read-only): order, FAAB, processing schedule
+    acq = d.get("settings", {}).get("acquisitionSettings", {}) or {}
+    me_t = next((t for t in d.get("teams", []) if t["id"] == myid), {}) or {}
+    tc = me_t.get("transactionCounter") or {}
+    budget = acq.get("acquisitionBudget")
+    faab = bool(acq.get("isUsingAcquisitionBudget"))
+    L["waiver"] = {"rank": me_t.get("waiverRank"), "teams": len(d.get("teams", [])), "faab": faab,
+                   "budget": budget if faab else None,
+                   "spent": tc.get("acquisitionBudgetSpent") if faab else None,
+                   "remaining": (budget - (tc.get("acquisitionBudgetSpent") or 0)) if faab and budget is not None else None,
+                   "process_days": acq.get("waiverProcessDays") or [], "process_hour": acq.get("waiverProcessHour"),
+                   "waiver_hours": acq.get("waiverHours"), "order_type": acq.get("waiverOrderReset"),
+                   "last_run": d.get("status", {}).get("waiverLastExecutionDate"),
+                   "order": [{"team": byid.get(t["id"]), "rank": t.get("waiverRank")} for t in sorted(d.get("teams", []), key=lambda t: t.get("waiverRank") or 99)]}
     L["source"] = "espn"
     return L
 

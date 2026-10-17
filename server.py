@@ -2,6 +2,7 @@ import json, re, time, os, threading, unicodedata
 import requests
 import adv as ADV
 import espn as ESPN
+import cards as CARDS
 from flask import Flask, jsonify, send_from_directory, request
 BASE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
@@ -145,7 +146,9 @@ def rototrade():
     STATUS["rototrade"] = {"ok": True, "fetched": "seed file, as of " + d["as_of"], "note": d.get("source")}
     return d
 
-def rosters_file(): return json.load(open(os.path.join(BASE, "data", "rosters.json")))
+def rosters_file():
+    mock = os.environ.get("LP_MOCK_ROSTERS")  # local testing only: a saved copy of live rosters
+    return json.load(open(mock if mock and os.path.exists(mock) else os.path.join(BASE, "data", "rosters.json")))
 def espn_ttl(): return 60 if in_nfl_window() else 120
 def rosters(): return ESPN.live_rosters(rosters_file(), cached, espn_ttl())
 
@@ -252,6 +255,32 @@ def build():
 def api_data():
     return jsonify(cached("build", espn_ttl() if ESPN.creds() else public_ttl(), build) if not request.args.get("refresh") else build())
 
+def _lg():
+    lg = str(request.args.get("lg", "WAN")).upper()
+    return lg if lg in ESPN.LEAGUES else "WAN"
+
+@app.route("/api/player/<pid>")
+def api_player(pid):
+    """ESPN-style player card. Read-only ESPN GETs, cached."""
+    try: pid = int(pid)
+    except ValueError: return jsonify({"ok": False, "error": "bad id"}), 400
+    try:
+        wk = CARDS.week_now(cached)
+        c = CARDS.card(cached, pid, _lg(), rosters(), wk, CARDS.pro_sched(cached))
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:160]}), 502
+    if not c: return jsonify({"ok": False, "error": "not found"}), 404
+    return jsonify({"ok": True, "card": c})
+
+@app.route("/api/waivers")
+def api_waivers():
+    """Live waiver wire for one league: every available player (FA + waivers) with ESPN projections/ownership."""
+    try:
+        wk = CARDS.week_now(cached)
+        return jsonify({"ok": True, **CARDS.waivers(cached, _lg(), rosters(), wk, CARDS.pro_sched(cached))})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:160]}), 502
+
 @app.route("/api/scoreboard")
 def api_scoreboard():
     def f():
@@ -309,6 +338,8 @@ def api_docs():
 <li><b>fpa</b>: {pos:{team:{fpa,rank}}} PPR points allowed per game (rank 32 = most allowed)</li><li><b>sched</b>: {team:{week:"vs OPP"|"@OPP"}} weeks cur..17 from ESPN</li>
 <li><b>sos</b>: {team:{pos:{ros|wan_po|slope_po:{avg_rank,grade}}}}</li><li><b>team_stats</b>: {team:{off_ppg,give_g}}</li>
 <li><b>rosters</b>, <b>meta</b>, <b>status</b> (per-source ok/fetched), cur_week, adv_season, adv_thru, rt_as_of, unmatched</li></ul>
+<h3>GET /api/player/&lt;espnId&gt;?lg=WAN|SLOPE</h3><p>ESPN player card: header, injury, % rostered/started (+/-), ownership in that league, week projection, season/proj stat rows, 18-week game log, remaining schedule, outlook, fantasy news. League-scored when ESPN cookies are set on the server.</p>
+<h3>GET /api/waivers?lg=WAN|SLOPE</h3><p>Live waiver wire: all available players (FA + WA with clear date) with ESPN projection, % rostered and change, % started, season pts/avg, last week, opponent; plus waiver order, FAAB and next processing time.</p>
 <h3>GET /api/scoreboard</h3><p>Live ESPN NFL scoreboard (cached 60 s): week, games[] {status,state,teams[{abbr,score,record,logo,home}],broadcast}.</p>
 <h3>GET /api/status</h3><p>Source health only.</p>
 <h3>POST /api/request</h3><p>One-tap GM request (header X-GM-Pin). Body {league: WAN|SLOPE, type: lineup|waiver|trade|chat, text, details}. Delivered to the GM bot (routine webhook if configured, always queued). Never touches ESPN.</p>
@@ -451,6 +482,12 @@ def manifest(): return send_from_directory(app.static_folder,"manifest.json",mim
 def sw(): return send_from_directory(app.static_folder,"sw.js",mimetype="application/javascript")
 @app.route("/")
 def index(): return send_from_directory(app.static_folder, "index.html")
+
+def _warm():
+    try:
+        wk = CARDS.week_now(cached); CARDS.pro_sched(cached); CARDS.pos_ranks(cached, wk)
+    except Exception: pass
+threading.Thread(target=_warm, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8765)), threaded=True)
