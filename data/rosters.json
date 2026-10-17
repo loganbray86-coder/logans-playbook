@@ -263,16 +263,16 @@
     "Rashee Rice": "O",
     "Jonathon Brooks": "IR",
     "Alvin Kamara": "Q",
+    "Pat Freiermuth": "Q",
     "Jeremiyah Love": "O",
     "Ja'Kobi Lane": "IR",
     "Travis Etienne Jr.": "IR",
     "Tyler Warren": "Q",
-    "DK Metcalf": "Q",
     "Caleb Williams": "Q",
     "Tyjae Spears": "Q",
     "Terry McLaurin": "Q",
     "Michael Pittman Jr.": "IR",
-    "Jacory Croskey-Merritt": "Q",
+    "Jacory Croskey-Merritt": "O",
     "Lamar Jackson": "O",
     "Breece Hall": "O",
     "Mike Evans": "Q",
@@ -314,7 +314,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 16:25 UTC"
+    "as_of": "2026-10-17 16:47 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -571,7 +571,7 @@
      "expires": 1792262486080
     }
    ],
-   "last_synced": "2026-10-17 16:25 UTC",
+   "last_synced": "2026-10-17 16:47 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1198,7 +1198,8 @@
     "Deebo Samuel Sr.": "O",
     "Tank Dell": "IR",
     "Jordan Addison": "Q",
-    "Jacory Croskey-Merritt": "Q",
+    "Jacory Croskey-Merritt": "O",
+    "Pat Freiermuth": "Q",
     "TreVeyon Henderson": "Q",
     "Stefon Diggs": "Q",
     "Will Shipley": "IR",
@@ -1247,7 +1248,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 16:25 UTC"
+    "as_of": "2026-10-17 16:47 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1438,7 +1439,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 16:25 UTC",
+   "last_synced": "2026-10-17 16:47 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1798,5 +1799,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 16:25 UTC"
+ "last_synced": "2026-10-17 16:47 UTC"
 }
