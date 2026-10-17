@@ -288,7 +288,6 @@
     "Tyreek Hill": "Q",
     "Will Shipley": "IR",
     "Chris Olave": "Q",
-    "Rachaad White": "Q",
     "Jordan Mason": "IR",
     "DJ Moore": "Q",
     "Stefon Diggs": "Q",
@@ -313,7 +312,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 19:04 UTC"
+    "as_of": "2026-10-17 19:10 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -516,7 +515,7 @@
      "expires": 1792278115304
     }
    ],
-   "last_synced": "2026-10-17 19:04 UTC",
+   "last_synced": "2026-10-17 19:10 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1139,7 +1138,6 @@
     "Tre' Harris": "O",
     "Jadarian Price": "IR",
     "De'Zhaun Stribling": "IR",
-    "Rachaad White": "Q",
     "Deebo Samuel Sr.": "O",
     "Tank Dell": "IR",
     "Jordan Addison": "Q",
@@ -1170,7 +1168,6 @@
     "Travis Etienne Jr.": "IR",
     "Michael Pittman Jr.": "IR",
     "Alec Pierce": "IR",
-    "Austin Ekeler": "Q",
     "Rashee Rice": "O",
     "DJ Moore": "Q",
     "Rico Dowdle": "Q",
@@ -1192,7 +1189,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 19:04 UTC"
+    "as_of": "2026-10-17 19:10 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1383,7 +1380,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 19:04 UTC",
+   "last_synced": "2026-10-17 19:10 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1743,5 +1740,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 19:04 UTC"
+ "last_synced": "2026-10-17 19:10 UTC"
 }
