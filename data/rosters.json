@@ -312,7 +312,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 20:10 UTC"
+    "as_of": "2026-10-17 23:04 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -485,37 +485,8 @@
      "rank": 12
     }
    ],
-   "pending": [
-    {
-     "type": "trade",
-     "status": "pending",
-     "from": "Somalian Pirates",
-     "items": [
-      {
-       "player": "Mike Evans",
-       "from": "Lamarvelous",
-       "to": "Somalian Pirates"
-      },
-      {
-       "player": "Josh Downs",
-       "from": "Lamarvelous",
-       "to": "Somalian Pirates"
-      },
-      {
-       "player": "Terry McLaurin",
-       "from": "Somalian Pirates",
-       "to": "Lamarvelous"
-      },
-      {
-       "player": "Tyler Allgeier",
-       "from": "Somalian Pirates",
-       "to": "Lamarvelous"
-      }
-     ],
-     "expires": 1792278115304
-    }
-   ],
-   "last_synced": "2026-10-17 20:10 UTC",
+   "pending": [],
+   "last_synced": "2026-10-17 23:04 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1189,7 +1160,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 20:10 UTC"
+    "as_of": "2026-10-17 23:04 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1380,7 +1351,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 20:10 UTC",
+   "last_synced": "2026-10-17 23:04 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1740,5 +1711,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 20:10 UTC"
+ "last_synced": "2026-10-17 23:04 UTC"
 }
