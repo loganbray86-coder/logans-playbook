@@ -257,7 +257,7 @@
    "notes": "Record 0-5 (12th). Live ESPN verified 2026-10-16. Lamar Q; Evans Q; Hall Doubtful; Brown/Goff/Gordon on bye Wk6.",
    "espn_status": {
     "Jadarian Price": "IR",
-    "Jalen Hurts": "O",
+    "Jalen Hurts": "IR",
     "Kyle Monangai": "O",
     "Kenyon Sadiq": "Q",
     "Rashee Rice": "O",
@@ -312,7 +312,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 19:18 UTC"
+    "as_of": "2026-10-17 20:00 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -515,7 +515,7 @@
      "expires": 1792278115304
     }
    ],
-   "last_synced": "2026-10-17 19:18 UTC",
+   "last_synced": "2026-10-17 20:00 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1130,7 +1130,7 @@
    "espn_status": {
     "Lamar Jackson": "O",
     "Breece Hall": "O",
-    "Jalen Hurts": "O",
+    "Jalen Hurts": "IR",
     "Adonai Mitchell": "O",
     "Jordyn Tyson": "IR",
     "Jordan Mason": "IR",
@@ -1189,7 +1189,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 19:18 UTC"
+    "as_of": "2026-10-17 20:00 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1380,7 +1380,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 19:18 UTC",
+   "last_synced": "2026-10-17 20:00 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1740,5 +1740,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 19:18 UTC"
+ "last_synced": "2026-10-17 20:00 UTC"
 }
