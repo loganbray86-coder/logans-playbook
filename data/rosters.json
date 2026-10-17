@@ -270,7 +270,6 @@
     "Tyler Warren": "Q",
     "Caleb Williams": "Q",
     "Tyjae Spears": "Q",
-    "Terry McLaurin": "Q",
     "Michael Pittman Jr.": "IR",
     "Jacory Croskey-Merritt": "O",
     "Lamar Jackson": "O",
@@ -314,7 +313,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 18:46 UTC"
+    "as_of": "2026-10-17 19:04 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -517,7 +516,7 @@
      "expires": 1792278115304
     }
    ],
-   "last_synced": "2026-10-17 18:46 UTC",
+   "last_synced": "2026-10-17 19:04 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1173,7 +1172,6 @@
     "Alec Pierce": "IR",
     "Austin Ekeler": "Q",
     "Rashee Rice": "O",
-    "Terry McLaurin": "Q",
     "DJ Moore": "Q",
     "Rico Dowdle": "Q",
     "Tyjae Spears": "Q",
@@ -1194,7 +1192,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 18:46 UTC"
+    "as_of": "2026-10-17 19:04 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1385,7 +1383,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 18:46 UTC",
+   "last_synced": "2026-10-17 19:04 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1745,5 +1743,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 18:46 UTC"
+ "last_synced": "2026-10-17 19:04 UTC"
 }
