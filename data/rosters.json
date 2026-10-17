@@ -49,10 +49,10 @@
      "Alvin Kamara",
      "Tre Tucker",
      "DST:KC",
-     "Rashod Bateman",
      "Bryce Young",
      "Devaughn Vele",
-     "DST:DEN"
+     "DST:DEN",
+     "Pat Freiermuth"
     ],
     "Love is Golden": [
      "Puka Nacua",
@@ -314,7 +314,7 @@
     "me_proj": 105.2,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-16 22:36 UTC"
+    "as_of": "2026-10-17 03:11 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -571,7 +571,7 @@
      "expires": 1792262486080
     }
    ],
-   "last_synced": "2026-10-16 22:36 UTC"
+   "last_synced": "2026-10-17 03:11 UTC"
   },
   "SLOPE": {
    "name": "Slopeside",
@@ -977,7 +977,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-16 22:36 UTC"
+    "as_of": "2026-10-17 03:11 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1168,10 +1168,10 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-16 22:36 UTC"
+   "last_synced": "2026-10-17 03:11 UTC"
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
- "as_of": "2026-10-16",
- "last_synced": "2026-10-16 22:36 UTC"
+ "as_of": "2026-10-17",
+ "last_synced": "2026-10-17 03:11 UTC"
 }
