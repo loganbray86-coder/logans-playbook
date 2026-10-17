@@ -314,7 +314,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 16:47 UTC"
+    "as_of": "2026-10-17 18:46 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -491,42 +491,6 @@
     {
      "type": "trade",
      "status": "pending",
-     "from": "Lamarvelous",
-     "items": [
-      {
-       "player": "Christian Watson",
-       "from": "Papa Smurf",
-       "to": "Lamarvelous"
-      },
-      {
-       "player": "Chase Brown",
-       "from": "Lamarvelous",
-       "to": "Papa Smurf"
-      }
-     ],
-     "expires": 1792262463566
-    },
-    {
-     "type": "trade",
-     "status": "pending",
-     "from": "Lamarvelous",
-     "items": [
-      {
-       "player": "D'Andre Swift",
-       "from": "Robert's Rowdy Team",
-       "to": "Lamarvelous"
-      },
-      {
-       "player": "Chase Brown",
-       "from": "Lamarvelous",
-       "to": "Robert's Rowdy Team"
-      }
-     ],
-     "expires": 1792262492201
-    },
-    {
-     "type": "trade",
-     "status": "pending",
      "from": "Somalian Pirates",
      "items": [
       {
@@ -551,27 +515,9 @@
       }
      ],
      "expires": 1792278115304
-    },
-    {
-     "type": "trade",
-     "status": "pending",
-     "from": "Lamarvelous",
-     "items": [
-      {
-       "player": "Malik Nabers",
-       "from": "Papa Smurf",
-       "to": "Lamarvelous"
-      },
-      {
-       "player": "Chase Brown",
-       "from": "Lamarvelous",
-       "to": "Papa Smurf"
-      }
-     ],
-     "expires": 1792262486080
     }
    ],
-   "last_synced": "2026-10-17 16:47 UTC",
+   "last_synced": "2026-10-17 18:46 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1248,7 +1194,7 @@
     "me_proj": 102.9,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 16:47 UTC"
+    "as_of": "2026-10-17 18:46 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1439,7 +1385,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 16:47 UTC",
+   "last_synced": "2026-10-17 18:46 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1799,5 +1745,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-17",
- "last_synced": "2026-10-17 16:47 UTC"
+ "last_synced": "2026-10-17 18:46 UTC"
 }
