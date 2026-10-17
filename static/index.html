@@ -98,6 +98,7 @@ pre.msg{white-space:pre-wrap;background:var(--card2);border:1px dashed var(--lin
 .back{display:flex;align-items:center;gap:2px;color:var(--blu);font-weight:800;background:none;border:0;font-size:14px;padding:0 0 10px}.back svg{width:18px;height:18px}
 .nw{padding:12px 14px;border-bottom:1px solid var(--line)}.nw:last-child{border:0}.nw .h{font-weight:800}.nw .d{font-size:13px;margin-top:3px;opacity:.85}
 .pr{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}.pr:last-child{border:0}.nm{font-weight:800}
+button.sent{opacity:.85}button.go.sent{background:#1a7f37!important;color:#fff!important}
 </style></head><body>
 <header><div class="brand"><div class="logo">LP</div><div><h1>My Playbook</h1><div class="upd" id="upd">Loading…</div></div></div><button class="hb" onclick="theme()" title="Dark mode" aria-label="Dark mode" id="thB"></button><button class="hb" id="rf" onclick="refresh()" title="Refresh" aria-label="Refresh"></button></header>
 <main id="main"><div class="empty">Loading your leagues…</div></main>
@@ -107,7 +108,8 @@ pre.msg{white-space:pre-wrap;background:var(--card2);border:1px dashed var(--lin
 <div class="ov" id="sheet" onclick="if(event.target===this)closeSheet()"><div class="sh"><div class="grab"></div><div class="shh"><button class="hb" onclick="closeSheet()" id="gmX"></button><h3>Ask GM</h3></div>
 <div class="gmh"><div class="av" id="gmAv"></div><div><b>Your Fantasy GM</b><div class="xs" id="shN"></div></div></div>
 <div class="shb"><div id="hist"></div></div><div class="qc" id="qc"></div><div class="cmp"><textarea id="gmT" rows="1" placeholder="Message your GM…" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea><button class="snd" onclick="sendGM()" id="cpB" aria-label="Send"></button></div>
-<div class="xs" id="gmS" style="margin-top:8px;text-align:center">Send copies it (or opens your share sheet). Paste it in your Grok Bot chat. The app never changes ESPN on its own.</div></div></div>
+<div class="xs" id="gmS" style="margin-top:8px;text-align:center">Send goes straight to your GM. If it can’t connect, it copies the message instead. The app never changes ESPN on its own.</div></div></div>
+<div class="ov" id="pinO" onclick="if(event.target===this)closeO('pinO')"><div class="sh"><div class="grab"></div><div class="shh"><button class="hb" onclick="closeO('pinO')" id="pinX"></button><h3>Connect this phone to your GM</h3></div><div class="shb"><p class="sm" style="margin:0 0 12px">One-time setup. Enter your GM passcode and every tap after this goes straight to your GM. Your GM checks ESPN, makes the move, and confirms in your Grok Bot chat. The app itself never changes ESPN.</p><input id="pinI" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="Passcode" style="width:100%;font-size:22px;letter-spacing:6px;text-align:center;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card,#fff);color:inherit;box-sizing:border-box" onkeydown="if(event.key==='Enter')pinSave()"><div class="xs dn" id="pinE" style="margin-top:8px;min-height:16px"></div><button class="yb" onclick="pinSave()">Connect</button></div></div></div>
 <div id="toast"></div>
 <script>
 let D=null,NEWS=[],tab=["home","moves","rank","news","team","stand"].includes(localStorage.tab)?localStorage.tab:"home",lg=localStorage.lg||"WAN",rk={mode:"wk",pos:"RB",q:""},mvSeg="w";
@@ -258,19 +260,42 @@ function pj(p){return p&&okStart(p)?pts(p):0}
 function needLine(team){const R=D.rosters.resolved[lg]||{},ps=(R[team]||[]).map(k=>D.byKey[k]).filter(Boolean);const need={QB:1,RB:2,WR:3,TE:1};
  const g=Object.keys(need).map(pos=>{const s=ps.filter(p=>p.pos===pos&&p.ros?.pos_num&&!["O","IR"].includes(status(p))).sort((a,b)=>a.ros.pos_num-b.ros.pos_num);const w=s[need[pos]-1];return {pos,n:s.length,w:w?w.ros.pos_num:999}});
  const thin=g.filter(x=>x.n<need[x.pos]||x.w>{QB:14,RB:28,WR:40,TE:14}[x.pos]).map(x=>x.pos);return thin}
-function mkW(id){const w=waivers().find(x=>x.id===id),l=L();openGM(`APPROVE ${LT(lg)} (${l.my_team}): add ${w.a.name} (${w.a.pos} ${w.a.team||""}), drop ${w.d.name}`,`Waiver move · verify ${w.a.name} is available`)}
-function mkT(t){const l=L();openGM(`APPROVE ${LT(lg)} (${l.my_team}): send trade offer to ${t.team} (${t.mgr}): I give ${t.a}, I get ${t.b}`,`Trade · RotoTrade ${sgn(t.dR)}, FantasyCalc ${sgn(t.dF)} for you`)}
+function mkW(id,ev){const w=waivers().find(x=>x.id===id),l=L();openGM(`APPROVE ${LT(lg)} (${l.my_team}): add ${w.a.name} (${w.a.pos} ${w.a.team||""}), drop ${w.d.name}`,`Waiver move · verify ${w.a.name} is available`)}
+function mkT(t,ev){const l=L();gmSend({league:lg,type:"trade",text:`APPROVE ${LT(lg)} (${l.my_team}): send trade offer to ${t.team} (${t.mgr}): I give ${t.a}, I get ${t.b}`,details:{card:t.id,partner_team:t.team,partner_mgr:t.mgr,give:t.a,get:t.b,rototrade_delta:t.dR,fantasycalc_delta:t.dF}},ev)}
 function sheet(t,n,p){openGM(p,t+": "+n)}
 const QC2=["Approve lineup","Who should I start?","Grade this trade","Who should I pick up?","Injury check"];
-function openGM(pre,ctx){$("shN").textContent=ctx||(D?`${LN(lg)} · ${L().my_team}`:"");$("gmT").value=pre||"";
+function openGM(pre,ctx){syncSent();$("shN").textContent=ctx||(D?`${LN(lg)} · ${L().my_team}`:"");$("gmT").value=pre||"";
  $("qc").innerHTML=QC2.map(q=>`<button onclick="qcp('${q}')">${q}</button>`).join("");drawH();$("sheet").classList.add("on");setTimeout(()=>{const t=$("gmT");t.style.height="auto";t.style.height=Math.min(120,t.scrollHeight)+"px"},0)}
 function qcp(q){let t;if(q==="Approve lineup"&&D)t=lineTxt(lineups(),lg);else t=`${LT(lg)} (${D?L().my_team:""}): ${q}${q==="Grade this trade"?" — I give: ___ / I get: ___":""}`;const e=$("gmT");e.value=t;e.style.height="auto";e.style.height=Math.min(120,e.scrollHeight)+"px";e.focus()}
-function drawH(){const h=JSON.parse(localStorage.gmHist||"[]");$("hist").innerHTML=`<div class="bub gm">Hey Logan, I'm your GM. Tap a chip or type a question. Send hands it to your Grok Bot chat, and I'll answer and make the ESPN move there once you approve.</div>`+h.slice(-15).map(m=>`<div class="bub me">${esc(m.t)}<small>${new Date(m.at).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})} · ${m.via}</small></div>`).join("");const b=$("hist").parentNode;b.scrollTop=1e6}
+function drawH(){const h=JSON.parse(localStorage.gmHist||"[]");$("hist").innerHTML=`<div class="bub gm">Hey Logan, I'm your GM. Tap a chip or type a question. Send comes straight to me. I'll answer in your Grok Bot chat and make ESPN moves after I check them.</div>`+h.slice(-15).map(m=>`<div class="bub me">${esc(m.t)}<small>${new Date(m.at).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})} · ${m.id?esc(STW[m.st||"pending"]||m.st):m.via}${m.note?" · "+esc(m.note):""}</small></div>`).join("");const b=$("hist").parentNode;b.scrollTop=1e6}
 function closeSheet(){$("sheet").classList.remove("on")}
-async function sendGM(){const t=$("gmT").value.trim();if(!t)return;let via="copied";
- if(navigator.share){try{await navigator.share({text:t});via="shared"}catch(e){if(e.name==="AbortError")return;copyTxt(t)}}else copyTxt(t);
- const h=JSON.parse(localStorage.gmHist||"[]");h.push({t,at:Date.now(),via});localStorage.gmHist=JSON.stringify(h.slice(-50));$("gmT").value="";drawH();
- toast(via==="shared"?"Shared. Make sure it goes to your Grok Bot chat":"Copied, paste it in your Grok Bot chat")}
+let _pend=null;
+function gmPin(){return localStorage.gmPin||""}
+function askPin(then){_pend=then;$("pinI").value="";$("pinE").textContent="";$("pinO").classList.add("on");setTimeout(()=>$("pinI").focus(),50)}
+async function pinSave(){const v=$("pinI").value.trim();if(!v)return;$("pinE").textContent="Checking…";
+ try{const r=await fetch("/api/pin-check",{method:"POST",headers:{"X-GM-Pin":v}});
+  if(r.ok){localStorage.gmPin=v;closeO("pinO");toast("Connected ✓");const f=_pend;_pend=null;if(f)f();return}
+  $("pinE").textContent=r.status===401?"That passcode didn't work. Try again.":r.status===503?"GM link isn't switched on yet. Ask your GM.":"Couldn't check, try again."}
+ catch(e){$("pinE").textContent="No connection. Try again."}}
+function hist(t,via,id){const h=JSON.parse(localStorage.gmHist||"[]");h.push({t,at:Date.now(),via,id});localStorage.gmHist=JSON.stringify(h.slice(-50))}
+async function gmSend(req,btn){if(!gmPin())return askPin(()=>gmSend(req,btn));
+ if(btn){btn.disabled=true;btn._h=btn.innerHTML;btn.textContent="Sending…"}
+ try{const r=await fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json","X-GM-Pin":gmPin()},body:JSON.stringify(req)});
+  if(r.status===401){localStorage.removeItem("gmPin");if(btn){btn.disabled=false;btn.innerHTML=btn._h}return askPin(()=>gmSend(req,btn))}
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error("send");
+  hist(req.text,"sent ✓",j.id);
+  if(btn){btn.textContent="Sent ✓";btn.classList.add("sent")}
+  toast("Sent to GM ✓ — I'll confirm when ESPN does");return true}
+ catch(e){copyTxt(req.text);hist(req.text,"copied",null);if(btn){btn.disabled=false;btn.innerHTML=btn._h}
+  toast("Couldn't reach GM, copied. Paste it in Grok Bot");return false}}
+async function syncSent(){if(!gmPin())return;const h=JSON.parse(localStorage.gmHist||"[]"),ids=h.filter(m=>m.id&&!["done","failed","declined"].includes(m.st)).map(m=>m.id).slice(-20);if(!ids.length)return;
+ try{const r=await fetch("/api/my-requests",{method:"POST",headers:{"Content-Type":"application/json","X-GM-Pin":gmPin()},body:JSON.stringify({ids})});if(!r.ok)return;const j=await r.json(),m={};(j.requests||[]).forEach(x=>m[x.id]=x);
+  let ch=false;h.forEach(x=>{const q=m[x.id];if(q&&(q.status!==x.st||q.note!==x.note)){x.st=q.status;x.note=q.note;ch=true}});if(ch){localStorage.gmHist=JSON.stringify(h);if($("sheet").classList.contains("on"))drawH()}}catch(e){}}
+const STW={pending:"Sent ✓ · waiting on GM",in_progress:"GM is on it",done:"✅ Done on ESPN",failed:"⚠️ Couldn't do it",declined:"Not made",needs_ok:"GM needs your OK in chat"};
+function reqType(t){return /^APPROVE .*LINEUP/i.test(t)?"lineup":/add .*, drop /i.test(t)?"waiver":/trade offer/i.test(t)?"trade":"chat"}
+async function sendGM(){const t=$("gmT").value.trim();if(!t)return;const b=$("cpB");
+ const ok=await gmSend({league:lg,type:reqType(t),text:t,details:{source:"ask_gm"}},b);b.disabled=false;b.innerHTML=I.send;b.classList.remove("sent");
+ if(ok!==undefined){$("gmT").value="";drawH()}}
 function waivers(){const base=waiversBase();let x;try{x=lineups()}catch(e){return base}
  const bad=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));if(!bad.length)return base;
  const l=L(),unt=new Set(l.untouchable||[]),mine=myKeys().map(k=>D.byKey[k]).filter(Boolean),starters=new Set(x.opt.filter(o=>o.p&&okStart(o.p)).map(o=>o.p.key));
@@ -314,7 +339,7 @@ const mgr=(id,t)=>{const m=(D.rosters.leagues[id].managers||{})[t];return m==="L
 function lx(id){const s=lg;lg=id;try{return lineups()}finally{lg=s}}
 function wx(id){const s=lg;lg=id;try{return waivers()}catch(e){return[]}finally{lg=s}}
 function tx(id){const s=lg;lg=id;try{return trades()}catch(e){return[]}finally{lg=s}}
-function optBtn(id,x){const g=x.optT-x.curT,n=x.changes.length,bad=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));return `<button class="opt" onclick="setLineup('${id}')"><div class="oi">${I.auto}</div><div><b>Optimize Lineup</b><small>${n?`${n} change${n>1?"s":""} · copy APPROVE msg for GM`:bad.length?`No healthy ${bad.map(o=>o.slot).join("/")} on roster · see Moves`:"Looks optimal · tap to double-check"}</small></div>${n?`<span class="ga">+${g.toFixed(1)}</span>`:""}</button>`}
+function optBtn(id,x){const g=x.optT-x.curT,n=x.changes.length,bad=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));return `<button class="opt" onclick="setLineup('${id}')"><div class="oi">${I.auto}</div><div><b>Optimize Lineup</b><small>${n?`${n} change${n>1?"s":""} · one tap to send to GM`:bad.length?`No healthy ${bad.map(o=>o.slot).join("/")} on roster · see Moves`:"Looks optimal · tap to double-check"}</small></div>${n?`<span class="ga">+${g.toFixed(1)}</span>`:""}</button>`}
 function leagueCard(id){const l=D.rosters.leagues[id],x=lx(id),m=l.matchup||{},me=+m.me||0,op=+m.opp_score||0,tot=me+op,pct=tot?me/tot*100:50;
  const oProj=m.opp_proj!=null?+m.opp_proj:null,win=oProj==null||x.optT>=oProj;
  const sg=x.changes.slice(0,3).map(c=>`<div class="mini">${c.inP?hs(c.inP,id):""}<div style="flex:1;min-width:0"><b>Start ${esc(c.inP?sn(c.inP):"—")}</b> <span class="mut">over ${esc(c.outP?sn(c.outP):"empty")}</span></div><b class="up">+${(pj(c.inP)-pj(c.outP)).toFixed(1)}</b></div>`).join("");
@@ -326,9 +351,9 @@ function leagueCard(id){const l=D.rosters.leagues[id],x=lx(id),m=l.matchup||{},m
  <div class="bar"><div style="flex:${pct};background:var(--grn)"></div><div style="flex:${100-pct};background:#9aa1ab"></div></div></div>
  <div class="sgl"><div class="h"><span class="cnt ${x.changes.length||bad.length?"":"ok"}">${x.changes.length+bad.length||"✓"}</span>${x.changes.length?`Lineup suggestion${x.changes.length>1?"s":""}`:bad.length?"Needs attention":"Lineup is optimal"}</div>${sg}${bad.map(o=>`<div class="mini"><span class="cnt">!</span><div style="flex:1"><b>No healthy ${o.slot}</b> <span class="mut">${esc(o.p?sn(o.p):"")} can't play · see Moves</span></div></div>`).join("")}</div>
  ${optBtn(id,x)}</div>`}
-function tcard(w,id){const p=w.a,c=TCOL[p.team]||"#3a4352";return `<div class="tc"><div class="top" style="--tcol:${c}">${p.espn_id?`<img class="h" src="https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${p.espn_id}.png&w=96&h=70&cb=1" alt="" loading="lazy" onerror="this.remove()">`:`<div class="hs" style="margin-bottom:8px">${esc(ini(p.name))}</div>`}<img class="li" src="${tlogoU(p.team)}" alt="" onerror="this.remove()"><span class="lgc">${id==="WAN"?"WAN":"SLOPE"}</span></div><div class="bd"><b>${esc(sn(p))} <span class="ps">${p.pos}</span></b><div class="xs">${p.espn_own??p.own?Math.round(p.espn_own??p.own)+"% Rost · ":""}ROS ${esc(p.ros?.pos_rank||"—")}</div><button class="addb" onclick="mkW('${w.id}')">+ Add</button></div></div>`}
+function tcard(w,id){const p=w.a,c=TCOL[p.team]||"#3a4352";return `<div class="tc"><div class="top" style="--tcol:${c}">${p.espn_id?`<img class="h" src="https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${p.espn_id}.png&w=96&h=70&cb=1" alt="" loading="lazy" onerror="this.remove()">`:`<div class="hs" style="margin-bottom:8px">${esc(ini(p.name))}</div>`}<img class="li" src="${tlogoU(p.team)}" alt="" onerror="this.remove()"><span class="lgc">${id==="WAN"?"WAN":"SLOPE"}</span></div><div class="bd"><b>${esc(sn(p))} <span class="ps">${p.pos}</span></b><div class="xs">${p.espn_own??p.own?Math.round(p.espn_own??p.own)+"% Rost · ":""}ROS ${esc(p.ros?.pos_rank||"—")}</div><button class="addb" onclick="mkW('${w.id}',this)">+ Add</button></div></div>`}
 function vHome(){const ids=Object.keys(D.rosters.leagues).sort((a,b)=>a==="WAN"?-1:1);let nC=0,nT=0,W=[];ids.forEach(id=>{nC+=lx(id).changes.length;nT+=tx(id).length;wx(id).slice(0,4).forEach(w=>W.push([w,id]))});
- let h=`<div class="promo"><div class="k">Week ${D.cur_week} · Game day prep</div><h3>${nC?`${nC} lineup change${nC>1?"s":""} ready`:"Both lineups locked in"}</h3><p>${nC?"Optimize, copy the APPROVE message, and paste it to your GM. Nothing changes on ESPN without your OK.":"Every slot has your best healthy player by FantasyPros projections."}</p><button class="pb" onclick="setLineup('${ids.find(i=>lx(i).changes.length)||lg}')">${I.auto}${nC?"Optimize now":"Review lineup"}</button></div>`;
+ let h=`<div class="promo"><div class="k">Week ${D.cur_week} · Game day prep</div><h3>${nC?`${nC} lineup change${nC>1?"s":""} ready`:"Both lineups locked in"}</h3><p>${nC?"Optimize, tap Set this lineup, and your GM makes it on ESPN and confirms.":"Every slot has your best healthy player by FantasyPros projections."}</p><button class="pb" onclick="setLineup('${ids.find(i=>lx(i).changes.length)||lg}')">${I.auto}${nC?"Optimize now":"Review lineup"}</button></div>`;
  h+=`<div class="qs"><button onclick="tab='moves';mvSeg='w';render();scrollTo(0,0)"><div class="ti i2">${I.moves}</div>Waivers</button><button onclick="tab='moves';mvSeg='t';render();scrollTo(0,0)"><div class="ti i3">${I.tc}</div>Trades${nT?` (${nT})`:""}</button><button onclick="tab='stand';render();scrollTo(0,0)"><div class="ti i1">${I.trophy}</div>Standings</button><button onclick="openGM('')"><div class="ti i4">${I.spark}</div>Ask GM</button></div>`;
  h+=`<div class="sec"><h2>My Leagues</h2><span class="sm">${ids.length} ESPN leagues</span></div>`+ids.map(leagueCard).join("");
  if(W.length)h+=`<div class="sec"><h2>Recommended Adds</h2><button class="lnk" onclick="tab='moves';mvSeg='w';render();scrollTo(0,0)">See all</button></div><div class="hsc">${W.map(([w,id])=>tcard(w,id)).join("")}</div>`;
@@ -344,13 +369,13 @@ function vTeam(){const l=L(),x=lx(lg),m=l.matchup||{};
  h+=`<div class="card"><div class="th"><span>Bench</span><span>Proj</span></div>${x.bench.map(p=>prow("BN",p)).join("")||'<div class="empty">No bench players</div>'}${irs.map(p=>prow("IR",p)).join("")}</div>`;
  h+=`<div class="card"><div class="th"><span>Current ESPN lineup</span><span>Proj</span></div>${x.cur.map(o=>prow(o.slot,o.p)).join("")}</div>`;
  return h+`<div class="note">Roster synced from ESPN ${esc(D.rosters.as_of||"")}. Rost % = ESPN ownership. Never starts bye, Out, Doubtful or IR players; locked players stay put.</div>`}
-function setLineup(id){id=id||lg;const x=lx(id),l=D.rosters.leagues[id];window._lt=lineTxt(x,id);
+function setLineup(id){id=id||lg;const x=lx(id),l=D.rosters.leagues[id];window._lt=lineTxt(x,id);window._lc=x.changes.map(c=>({slot:c.slot,start:c.inP?.name||null,bench:c.outP?.name||null}));
  let h=`<div class="sm" style="text-align:center;margin-bottom:10px">${esc(LN(id))} · ${esc(l.my_team)} (${esc(mgr(id,l.my_team))}) · Week ${D.cur_week}</div>`;
  h+=`<div class="stat"><div><span class="xs">Current</span><b>${x.curT.toFixed(1)}</b></div><div><span class="xs">Optimal</span><b class="up">${x.optT.toFixed(1)}</b></div><div><span class="xs">Gain</span><b class="${x.changes.length?"up":""}">+${(x.optT-x.curT).toFixed(1)}</b></div></div>`;
  if(x.changes.length){h+=`<div class="card" style="padding:2px 12px">`+x.changes.map(c=>`<div class="chg"><span class="sp">${c.slot}</span>${c.inP?hs(c.inP,id):""}<div style="flex:1;min-width:0"><div><span class="inp in">START</span> <b>${esc(c.inP?.name||"—")}</b> <span class="xs">${pj(c.inP).toFixed(1)}</span></div><div style="margin-top:4px" class="sm"><span class="inp outp">BENCH</span> ${esc(c.outP?.name||"Empty slot")}${c.outP?tags(c.outP,id):""}</div></div></div>`).join("")+`</div>`}
  else h+=`<div class="empty" style="padding:10px"><b class="up">✓ Lineup already optimal</b>Best healthy, non-bye player in every slot (${x.optT.toFixed(1)} proj).</div>`;
  const bad=x.opt.filter(o=>o.forced||(o.p&&!okStart(o.p)));if(bad.length)h+=`<div class="note" style="margin-top:8px"><b class="dn">Heads up:</b> no healthy option for ${bad.map(o=>o.slot).join(", ")} (${bad.map(o=>esc(o.p?.name||"empty")).join(", ")}). Check Moves → Waivers.</div>`;
- h+=`<div class="kick" style="margin-top:12px">Message for your GM</div><pre class="msg">${esc(window._lt)}</pre><button class="yb" onclick="copyTxt(window._lt);toast('Copied! Paste it in your Grok Bot chat')">${I.copy}Copy APPROVE message</button><button class="yb ghost" onclick="closeO('lnO');openGM(window._lt)">Send via Ask GM</button>`;
+ h+=`<div class="kick" style="margin-top:12px">Message for your GM</div><pre class="msg">${esc(window._lt)}</pre><button class="yb" onclick="gmSend({league:'${id}',type:'lineup',text:window._lt,details:{changes:window._lc}},this)">${x.changes.length?"Set this lineup":"Ask GM to double-check"}</button><button class="yb ghost" onclick="copyTxt(window._lt);toast('Copied! Paste it in your Grok Bot chat')">${I.copy}Copy message instead</button>`;
  $("lnB").innerHTML=h;$("lnO").classList.add("on")}
 function vRank(){let h=lgSwitch()+`<div class="seg"><button class="${rk.mode==="wk"?"on":""}" onclick="rk.mode='wk';render()">Week ${D.cur_week}</button><button class="${rk.mode==="ros"?"on":""}" onclick="rk.mode='ros';render()">Rest of Season</button></div>`;
  h+=`<div class="pills">${["QB","RB","WR","TE","K","DST"].map(p=>`<button class="${rk.pos===p?"on":""}" onclick="rk.pos='${p}';render()">${p}</button>`).join("")}</div>`;
@@ -366,7 +391,7 @@ function vMoves(){const l=L(),W=waivers(),T=trades();let h=lgSwitch()+`<div clas
   h+=W.length?W.map((w,i)=>`<div class="card"><div class="mvh"><div class="kick" ${w.urgent?'style="color:var(--red)"':""}>${w.urgent?"🚨 Fill your "+w.urgent+" slot":"Pickup #"+(i+1)} · ${esc(LN(lg))} · verify on ESPN</div></div>${prow2(w.a,"add")}${prow2(w.d,"drop")}
   <div class="strip"><div><b>${esc(w.a.ros?.pos_rank||"—")}</b>ROS rank</div><div><b>${esc(w.d.ros?.pos_rank||"unrk")}</b>Drop ROS</div><div><b>${fmt(fcv(w.a))}</b>FC value</div><div><b>${w.a.wk?.pts!=null&&!onBye(w.a)?w.a.wk.pts.toFixed(1):"—"}</b>Wk ${D.cur_week} proj</div></div>
   <div class="why"><b>Why:</b> ${w.why?esc(w.why)+" ":""}FantasyPros ROS ${esc(w.a.ros?.pos_rank||"unranked")} vs ${esc(w.d.ros?.pos_rank||"unranked")} for ${esc(w.d.name)}; FantasyCalc ${fmt(fcv(w.a))} vs ${fmt(fcv(w.d))}.</div>
-  <div class="btns"><button class="go" onclick="mkW('${w.id}')">Make Move</button><button class="no" onclick="dismiss('${w.id}')">Dismiss</button></div></div>`).join(""):`<div class="card"><div class="empty"><b>No pickups right now</b>Nobody available beats your weakest bench player by enough to be worth a move.</div></div>`;
+  <div class="btns"><button class="go" onclick="mkW('${w.id}',this)">Make Move</button><button class="no" onclick="dismiss('${w.id}')">Dismiss</button></div></div>`).join(""):`<div class="card"><div class="empty"><b>No pickups right now</b>Nobody available beats your weakest bench player by enough to be worth a move.</div></div>`;
   h+=`<div class="note">Free agents = players not on any roster in this league. Never drops starters or Chase Brown / Breece Hall (K/DST only when one is on bye and a slot is empty); never adds Out/IR players.</div>`}
  else{
   h+=T.map(t=>{const id=`t:${lg}:${t.A.key}:${t.B.key}`,th=needLine(t.team).filter(q=>q!==t.B.pos);const why=[...t.why];if(th.length&&!why.some(w=>w.includes("thin")))why.unshift(`Their roster is thin at ${th.join(", ")}`);
@@ -375,7 +400,7 @@ function vMoves(){const l=L(),W=waivers(),T=trades();let h=lgSwitch()+`<div clas
    <div class="kick" style="margin:8px 14px 0">Rest-of-season impact for you</div>
    <div class="grd"><div>RotoTrade<b class="up">${sgn(t.dR)}</b>${t.A.rt} → ${t.B.rt}</div><div>FantasyCalc<b class="up">${sgn(t.dF)}</b>${fmt(fcv(t.A))} → ${fmt(fcv(t.B))}</div></div>
    <div class="why"><b>Why ${esc(t.mgr||"they")} would accept</b><ul>${why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
-   <div class="btns"><button class="go" onclick='mkT(${JSON.stringify({id,team:t.team,mgr:t.mgr,a:t.A.name,b:t.B.name,dR:t.dR,dF:t.dF}).replace(/'/g,"&#39;")})'>Make the Move</button><button class="no" onclick="dismiss('${id}')">Dismiss</button></div></div>`}).join("");
+   <div class="btns"><button class="go" onclick='mkT(${JSON.stringify({id,team:t.team,mgr:t.mgr,a:t.A.name,b:t.B.name,dR:t.dR,dF:t.dF}).replace(/'/g,"&#39;")},this)'>Make the Move</button><button class="no" onclick="dismiss('${id}')">Dismiss</button></div></div>`}).join("");
   if(T.length<3)h+=`<div class="card"><div class="empty"><b>${T.length?"That's every deal that passes":"No trades pass right now"}</b>Only offers where you're even or ahead on both RotoTrade and FantasyCalc, a partner need explains the yes, and nobody involved is injured or Brown/Hall.</div></div>`;
   h+=`<div class="note">ROS impact = value you get minus value you send (RotoTrade seed ${esc(D.rt_as_of)}; FantasyCalc ${l.teams_count}-team PPR redraft). Players missing either value are skipped, never guessed.</div>`}
  return h}
@@ -385,16 +410,16 @@ function vStand(){const l=L(),S=(l.standings||[]).slice().sort((a,b)=>(a.rank||a
  const cut=l.teams_count>=16?8:6;
  h+=`<div class="card"><div class="th"><span>${esc(LN(lg))} · ${l.teams_count} teams</span><span>Week ${D.cur_week}</span></div><table class="st"><tr><th>Team</th><th>W-L</th><th>PCT</th><th>GB</th><th>PF</th></tr>`+S.map((s,i)=>`<tr class="${s.team===l.my_team?"me":""} ${i===cut-1&&S.length>cut?"cut":""}"><td><div class="tm"><span class="sd">${s.rank||s.seed||i+1}</span>${helm(s.team,24)}<div style="min-width:0"><b>${esc(s.team)}</b><span>${esc(mgr(lg,s.team)||"—")}</span></div></div></td><td>${s.w}-${s.l}${s.t?"-"+s.t:""}</td><td>${pct(s)}</td><td>${gb(s)}</td><td>${(+s.pf||0).toFixed(1)}</td></tr>`).join("")+`</table></div>`;
  return h+`<div class="note">From ESPN sync ${esc(l.last_synced||D.rosters.as_of||"")}. Dashed line = top ${cut} (playoff line estimate). Your team is highlighted.</div>`}
-function mkW(id){const lid=String(id).split(":")[1]||lg;const s=lg;lg=lid;const w=waivers().find(x=>x.id===id),l=L();lg=s;if(!w)return toast("That move is gone, refresh");openGM(`APPROVE ${LT(lid)} (${l.my_team}): add ${w.a.name} (${w.a.pos} ${w.a.team||""}), drop ${w.d.name}`,`Waiver move · verify ${w.a.name} is available`)}
+function mkW(id,ev){const lid=String(id).split(":")[1]||lg;const s=lg;lg=lid;const w=waivers().find(x=>x.id===id),l=L();lg=s;if(!w)return toast("That move is gone, refresh");gmSend({league:lid,type:"waiver",text:`APPROVE ${LT(lid)} (${l.my_team}): add ${w.a.name} (${w.a.pos} ${w.a.team||""}), drop ${w.d.name}`,details:{card:id,add:w.a.name,add_pos:w.a.pos,add_team:w.a.team,add_espn_id:w.a.espn_id,drop:w.d.name,drop_espn_id:w.d.espn_id,why:w.why||null}},ev)}
 function render(){$("tabs").innerHTML=TABS5.map(([id,ic,lab])=>`<button class="${tab===id||(tab==="team"&&id==="home")?"on":""}" onclick="tab='${id}';localStorage.tab=tab;render();scrollTo(0,0)">${I[ic]}${lab}</button>`).join("");
  if(!D)return;try{$("main").innerHTML={home:vHome,team:vTeam,rank:vRank,moves:vMoves,news:vNews,stand:vStand}[tab]()}catch(e){$("main").innerHTML=`<div class="card pad dn">Error: ${esc(e.message)}</div>`;console.error(e)}}
 function theme(){const d=document.documentElement.classList.toggle("dark");localStorage.theme=d?"dark":"light";document.querySelector("meta[name=theme-color]").content=d?"#0b0d10":"#ffffff";$("thB").innerHTML=d?I.sun:I.moon}
 if(!LN.v5){}
 if(localStorage.theme==="dark"){document.documentElement.classList.add("dark");document.querySelector("meta[name=theme-color]").content="#0b0d10"}
 {const q=new URLSearchParams(location.search);if(q.get("theme")==="dark")document.documentElement.classList.add("dark");if(q.get("tab"))tab=q.get("tab")}
-$("thB").innerHTML=document.documentElement.classList.contains("dark")?I.sun:I.moon;$("rf").innerHTML=I.refresh;$("fab").innerHTML=I.spark+"Ask GM";$("lnX").innerHTML=I.x;$("gmX").innerHTML=I.x;$("cpB").innerHTML=I.send;$("gmAv").innerHTML=I.spark;
+$("thB").innerHTML=document.documentElement.classList.contains("dark")?I.sun:I.moon;$("rf").innerHTML=I.refresh;$("fab").innerHTML=I.spark+"Ask GM";$("lnX").innerHTML=I.x;$("gmX").innerHTML=I.x;$("pinX").innerHTML=I.x;$("cpB").innerHTML=I.send;$("gmAv").innerHTML=I.spark;
 render();load().then(()=>{const q=new URLSearchParams(location.search);if(q.get("open")==="lineup")setLineup(q.get("lg")||lg);if(q.get("open")==="gm")openGM("")}).catch(e=>{$("main").innerHTML='<div class="empty">Couldn\'t load data. Tap Refresh.</div>'});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")softRefresh()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){softRefresh();syncSent()}});
 window.addEventListener("focus",()=>softRefresh());
 setInterval(()=>{if(document.visibilityState==="visible")softRefresh()},5*60*1000);
 setInterval(setUpd,30*1000);

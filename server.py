@@ -303,14 +303,147 @@ def api_status(): return jsonify(STATUS)
 @app.route("/api")
 def api_docs():
     return """<html><body style="background:#0b0f17;color:#e8edf5;font-family:sans-serif;padding:20px;max-width:800px">
-<h1>Logan's Playbook JSON API</h1><p>All read-only GET endpoints. Nothing here touches ESPN.</p>
+<h1>Logan's Playbook JSON API</h1><p>Nothing here writes to ESPN. ESPN is only ever read.</p>
 <h3>GET /api/data</h3><p>Everything the app uses. Add <code>?refresh=1</code> to force a blocking rebuild. Otherwise public sources (FantasyPros, FantasyCalc, Sleeper, schedule, news, build) use a 15 min TTL (5 min for scores/news during Thu/Sun/Mon NFL windows). Expired cache is served immediately and refreshed in a background thread. nflverse adv stays ~6 h.</p>
 <ul><li><b>players[]</b>: key, name, pos, team, bye, opp, own (FP avg roster %), wk {rank,pos_rank,pts (FP PPR projection),best,worst,avg,std,grade,delta}, ros {overall,pos_rank,pos_num,...}, rt (RotoTrade seed), fc12/fc16 (FantasyCalc), inj/inj_part/inj_note (Sleeper), adv {g,ppg,tgt_g,ts,ay_g,touch_g,snap,last3[],trend,trend_val,tot{}} (nflverse), cuff (Sleeper depth chart RB2), owners {WAN|SLOPE: team}</li>
 <li><b>fpa</b>: {pos:{team:{fpa,rank}}} PPR points allowed per game (rank 32 = most allowed)</li><li><b>sched</b>: {team:{week:"vs OPP"|"@OPP"}} weeks cur..17 from ESPN</li>
 <li><b>sos</b>: {team:{pos:{ros|wan_po|slope_po:{avg_rank,grade}}}}</li><li><b>team_stats</b>: {team:{off_ppg,give_g}}</li>
 <li><b>rosters</b>, <b>meta</b>, <b>status</b> (per-source ok/fetched), cur_week, adv_season, adv_thru, rt_as_of, unmatched</li></ul>
 <h3>GET /api/scoreboard</h3><p>Live ESPN NFL scoreboard (cached 60 s): week, games[] {status,state,teams[{abbr,score,record,logo,home}],broadcast}.</p>
-<h3>GET /api/status</h3><p>Source health only.</p></body></html>"""
+<h3>GET /api/status</h3><p>Source health only.</p>
+<h3>POST /api/request</h3><p>One-tap GM request (header X-GM-Pin). Body {league: WAN|SLOPE, type: lineup|waiver|trade|chat, text, details}. Delivered to the GM bot (routine webhook if configured, always queued). Never touches ESPN.</p>
+<h3>GET /api/requests?token=GM_TOKEN&amp;status=pending|all&amp;since=ts</h3><p>Bot queue. POST /api/requests/&lt;id&gt;/ack?token=… {status: in_progress|done|failed|declined|needs_ok, note}.</p></body></html>"""
+
+# ---------------------------------------------------------------------------
+# One-tap GM requests. The app NEVER writes to ESPN. A tap only delivers a
+# request to the Fantasy Football GM bot, which verifies and makes the move.
+#   GM_PIN          passcode a device must send (X-GM-Pin) to submit requests
+#   GM_TOKEN        shared secret the bot uses to poll/ack the queue
+#   GM_WEBHOOK_URL  optional: Grok Bot routine webhook URL (instant push)
+#   GM_WEBHOOK_KEY  optional: that routine's key, sent as Authorization: Bearer
+# ---------------------------------------------------------------------------
+import hmac, uuid, collections
+REQ_PATH = os.path.join(BASE, "cache", "requests.jsonl")
+_req_lock = threading.Lock()
+_fails = collections.defaultdict(list)   # ip -> [ts]
+_fails_all = []
+REQ_TYPES = ("lineup", "waiver", "trade", "chat")
+REQ_LEAGUES = ("WAN", "SLOPE", "")
+
+def _load_reqs():
+    out = collections.OrderedDict()
+    if os.path.exists(REQ_PATH):
+        for line in open(REQ_PATH):
+            try:
+                r = json.loads(line)
+                if r.get("_upd"): out.get(r["id"], {}).update({k: v for k, v in r.items() if k not in ("_upd", "id")})
+                else: out[r["id"]] = r
+            except Exception: pass
+    return out
+REQS = _load_reqs()
+
+def _append(rec):
+    with open(REQ_PATH, "a") as f: f.write(json.dumps(rec) + "\n")
+
+def _ip():
+    return (request.headers.get("X-Forwarded-For") or request.remote_addr or "?").split(",")[0].strip()
+
+def _locked_out():
+    now = time.time(); ip = _ip()
+    _fails[ip] = [t for t in _fails[ip] if now - t < 3600]
+    _fails_all[:] = [t for t in _fails_all if now - t < 3600]
+    return len(_fails[ip]) >= 8 or len(_fails_all) >= 40
+
+def _pin_ok():
+    pin = os.environ.get("GM_PIN", "")
+    got = (request.headers.get("X-GM-Pin") or "").strip()
+    if not pin: return None  # not configured: fail closed
+    if _locked_out(): return False
+    if got and hmac.compare_digest(got.encode(), pin.encode()): return True
+    now = time.time(); _fails[_ip()].append(now); _fails_all.append(now)
+    return False
+
+def _token_ok():
+    tok = os.environ.get("GM_TOKEN", "")
+    got = request.args.get("token") or (request.headers.get("Authorization") or "").replace("Bearer ", "", 1).strip()
+    return bool(tok) and bool(got) and hmac.compare_digest(got.encode(), tok.encode())
+
+def _public(r):
+    return {k: r.get(k) for k in ("id", "at", "league", "type", "text", "status", "note", "delivered", "updated")}
+
+def _push_webhook(r):
+    url, key = os.environ.get("GM_WEBHOOK_URL", ""), os.environ.get("GM_WEBHOOK_KEY", "")
+    if not (url.startswith("https://") and key): return "queued"
+    body = {"source": "logans-playbook", "kind": "gm_request", "request": _public(r), "details": r.get("details"),
+            "ack": "POST /api/requests/%s/ack with GM_TOKEN when done" % r["id"]}
+    try:
+        k = key if key.lower().startswith("bearer ") else "Bearer " + key
+        resp = requests.post(url, json=body, headers={"Authorization": k, "Content-Type": "application/json"}, timeout=8)
+        return "webhook" if resp.status_code < 300 else "queued (webhook %d)" % resp.status_code
+    except Exception as e:
+        return "queued (webhook error)"
+
+@app.route("/api/pin-check", methods=["POST"])
+def api_pin_check():
+    ok = _pin_ok()
+    if ok is None: return jsonify({"ok": False, "error": "not_configured"}), 503
+    return (jsonify({"ok": True}), 200) if ok else (jsonify({"ok": False, "error": "bad_pin"}), 401)
+
+@app.route("/api/request", methods=["POST"])
+def api_request():
+    ok = _pin_ok()
+    if ok is None: return jsonify({"ok": False, "error": "not_configured"}), 503
+    if not ok: return jsonify({"ok": False, "error": "bad_pin"}), 401
+    b = request.get_json(silent=True) or {}
+    typ = str(b.get("type", "chat")).lower(); lg = str(b.get("league", "")).upper()
+    text = str(b.get("text", "")).strip()[:2000]
+    if typ not in REQ_TYPES or lg not in REQ_LEAGUES or not text:
+        return jsonify({"ok": False, "error": "bad_request"}), 400
+    det = b.get("details") if isinstance(b.get("details"), dict) else {}
+    det = det if len(json.dumps(det)) <= 4000 else {"truncated": True}
+    now = time.time()
+    with _req_lock:
+        for r in reversed(list(REQS.values())[-20:]):  # double-tap protection
+            if r["text"] == text and now - r["ts"] < 90 and r.get("status") == "pending":
+                return jsonify({"ok": True, "id": r["id"], "delivered": r.get("delivered"), "dup": True})
+        r = {"id": uuid.uuid4().hex[:10], "ts": now, "at": _stamp(), "league": lg, "type": typ, "text": text,
+             "details": det, "status": "pending", "note": None, "ip": _ip()}
+        REQS[r["id"]] = r
+        while len(REQS) > 500: REQS.popitem(last=False)
+        _append(r)
+    r["delivered"] = _push_webhook(r)
+    with _req_lock: _append({"_upd": 1, "id": r["id"], "delivered": r["delivered"]})
+    return jsonify({"ok": True, "id": r["id"], "delivered": r["delivered"]})
+
+@app.route("/api/my-requests", methods=["POST"])
+def api_my_requests():
+    ok = _pin_ok()
+    if not ok: return jsonify({"ok": False}), 401 if ok is False else 503
+    ids = (request.get_json(silent=True) or {}).get("ids") or []
+    with _req_lock: out = [_public(REQS[i]) for i in ids[:50] if i in REQS]
+    return jsonify({"ok": True, "requests": out})
+
+@app.route("/api/requests")
+def api_requests():
+    if not _token_ok(): return jsonify({"ok": False}), 401
+    st = request.args.get("status", "pending"); since = float(request.args.get("since", 0) or 0)
+    with _req_lock:
+        out = [{**_public(r), "ts": r["ts"], "details": r.get("details")} for r in REQS.values()
+               if (st == "all" or r.get("status") == st) and r["ts"] > since]
+    return jsonify({"ok": True, "now": time.time(), "requests": out})
+
+@app.route("/api/requests/<rid>/ack", methods=["POST"])
+def api_ack(rid):
+    if not _token_ok(): return jsonify({"ok": False}), 401
+    b = request.get_json(silent=True) or {}
+    st = str(b.get("status", "done"))
+    if st not in ("in_progress", "done", "failed", "declined", "needs_ok"): return jsonify({"ok": False, "error": "bad_status"}), 400
+    with _req_lock:
+        r = REQS.get(rid)
+        if not r: return jsonify({"ok": False, "error": "not_found"}), 404
+        r.update({"status": st, "note": str(b.get("note") or "")[:500] or None, "updated": _stamp()})
+        _append({"_upd": 1, "id": rid, "status": r["status"], "note": r["note"], "updated": r["updated"]})
+    return jsonify({"ok": True, "request": _public(r)})
 
 @app.route("/manifest.json")
 def manifest(): return send_from_directory(app.static_folder,"manifest.json",mimetype="application/manifest+json")
