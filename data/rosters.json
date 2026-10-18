@@ -288,7 +288,8 @@
     "Zach Charbonnet": "O",
     "Isiah Pacheco": "IR",
     "Terrance Ferguson": "IR",
-    "Adonai Mitchell": "O"
+    "Adonai Mitchell": "O",
+    "Romeo Doubs": "Q"
    },
    "record": "0-5 (12th of 12)",
    "place": "12th Place",
@@ -474,7 +475,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 16:17 UTC",
+   "last_synced": "2026-10-18 17:54 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1122,7 +1123,9 @@
     "DJ Moore": "Q",
     "Zach Charbonnet": "O",
     "Pat Bryant": "IR",
-    "Case Keenum": "O"
+    "Case Keenum": "O",
+    "Carson Steele": "Q",
+    "Romeo Doubs": "Q"
    },
    "record": "2-3 (10th of 16)",
    "untouchable": [
@@ -1329,7 +1332,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 16:17 UTC",
+   "last_synced": "2026-10-18 17:54 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1689,5 +1692,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 16:17 UTC"
+ "last_synced": "2026-10-18 17:54 UTC"
 }
