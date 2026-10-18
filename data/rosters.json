@@ -257,7 +257,6 @@
    "espn_status": {
     "Adonai Mitchell": "O",
     "Alec Pierce": "IR",
-    "Alvin Kamara": "Q",
     "Breece Hall": "O",
     "DJ Moore": "Q",
     "David Montgomery": "O",
@@ -476,7 +475,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 18:09 UTC",
+   "last_synced": "2026-10-18 18:40 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1090,7 +1089,6 @@
    "espn_status": {
     "Adonai Mitchell": "O",
     "Alec Pierce": "IR",
-    "Alvin Kamara": "Q",
     "Breece Hall": "O",
     "Caleb Douglas": "Q",
     "Carson Steele": "Q",
@@ -1116,6 +1114,7 @@
     "Pat Bryant": "IR",
     "Quinshon Judkins": "O",
     "Rashee Rice": "O",
+    "Rashod Bateman": "Q",
     "Roman Wilson": "IR",
     "Romeo Doubs": "Q",
     "Saquon Barkley": "O",
@@ -1127,8 +1126,7 @@
     "Tyler Warren": "O",
     "Tyreek Hill": "Q",
     "Will Shipley": "IR",
-    "Zach Charbonnet": "O",
-    "Rashod Bateman": "Q"
+    "Zach Charbonnet": "O"
    },
    "record": "2-3 (10th of 16)",
    "untouchable": [
@@ -1335,7 +1333,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 18:09 UTC",
+   "last_synced": "2026-10-18 18:40 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1695,5 +1693,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 18:27 UTC"
+ "last_synced": "2026-10-18 18:40 UTC"
 }
