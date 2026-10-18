@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Playbook Connect</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<header><div class="logo">PB</div><div><b>Playbook Connect</b><small>Connect ESPN to Playbook in one click</small></div></header>
+<main id="app">
+ <section class="card" id="signin"><div class="kick">1 · Your ESPN sign-in</div><div id="siTxt">Checking…</div></section>
+ <section class="card" id="lg"><div class="kick">2 · Which leagues?</div>
+  <div id="tabs"></div>
+  <label class="row"><input type="checkbox" id="disc" checked> <span>Also find my football leagues on ESPN</span></label>
+  <input id="paste" placeholder="Or paste a league link or ID" autocomplete="off" spellcheck="false">
+ </section>
+ <button class="yb" id="go">Connect to Playbook</button>
+ <div class="err" id="err"></div>
+ <section class="card hide" id="done"><div class="kick">3 · Connected</div><div id="res"></div>
+  <button class="yb" id="open">Open Playbook</button>
+  <button class="ghost" id="phone">Copy link for my phone</button>
+  <div class="xs" id="phoneTip">Text or email the link to yourself and open it on your phone. Don't share it with anyone else: it carries your locked ESPN connection.</div>
+ </section>
+ <details class="priv"><summary>🔒 What this add-on does with your ESPN sign-in</summary>
+  <ul><li>When you tap <b>Connect</b>, it reads only two ESPN cookies, <b>espn_s2</b> and <b>SWID</b>. It never sees your password.</li>
+  <li>It sends them once, over HTTPS, only to the Playbook server picked below. Playbook checks them with one read of your league and sends back a locked (encrypted) key for each league.</li>
+  <li>The add-on never saves your cookies. It keeps only the server you picked. No analytics, no tracking, nothing else.</li>
+  <li>Playbook only <b>reads</b> ESPN. It can't make moves or change your team. Signing out of ESPN everywhere turns the connection off.</li></ul></details>
+</main>
+<footer><label>Playbook server <select id="srv"></select></label></footer>
+<script src="config.js"></script><script src="popup.js"></script>
+</body></html>

@@ -1,3 +1,4 @@
+import urllib.parse
 import json, re, time, os, threading, unicodedata, hashlib
 import requests
 import vault as VAULT
@@ -582,6 +583,91 @@ def api_connect():
         return jsonify({"ok": False, "code": code, "msg": msg}), 401 if code == "bad_creds" else 404 if code == "not_found" else 502
     info, teams = team_list(d)
     return jsonify({"ok": True, "token": tok, "league": {**info, "season": season, "private": True}, "teams": teams})
+
+# ---------------------------------------------------------------------------
+# "Playbook Connect" Chrome add-on (extension/playbook-connect). The add-on reads the friend's own espn_s2 + SWID
+# cookies once, posts them here, and gets back one sealed token per league. Same rules as /api/connect: the codes
+# are only used for reads, never logged, never stored, never sent back.
+EXT_IDS = [x.strip() for x in os.environ.get("EXT_IDS", "aniopchmkabeloipmicldolcmpjmmggj").split(",") if x.strip()]
+EXT_ORIGINS = {"chrome-extension://" + x for x in EXT_IDS}
+FAN_URL = "https://fan.api.espn.com/apis/v2/fans/%s?displayHiddenPrefs=true&context=fantasy&useCookieAuth=true&source=fantasyapp-ios&featureFlags=challengeEntries"
+
+def _ext_cors(resp):
+    o = request.headers.get("Origin", "")
+    if o in EXT_ORIGINS:
+        resp.headers["Access-Control-Allow-Origin"] = o
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        resp.headers["Access-Control-Max-Age"] = "600"
+        resp.headers["Vary"] = "Origin"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+def espn_leagues(cookies, swid, season):
+    """Best effort: ask ESPN's fan profile which fantasy football leagues this account is in (read only).
+    ESPN doesn't document this, so any failure just means 'none found' and the friend picks/pastes a league."""
+    try:
+        r = ESPN.http_get(FAN_URL % urllib.parse.quote(swid), cookies=cookies, timeout=10)
+        if r.status_code != 200: return []
+        j = r.json()
+    except Exception:
+        return []
+    out, seen = [], set()
+    for pref in (j.get("preferences") or []):
+        e = ((pref.get("metaData") or {}).get("entry") or {})
+        if not e or str(e.get("abbrev") or "").upper() not in ("FFL", "") and e.get("gameId") not in (1, "1"): continue
+        if e.get("seasonId") and int(e.get("seasonId")) != int(season): continue
+        for g in (e.get("groups") or []):
+            try: lid = int(g.get("groupId"))
+            except (TypeError, ValueError): continue
+            if lid in seen: continue
+            seen.add(lid); out.append({"id": lid, "tid": e.get("entryId")})
+    return out[:10]
+
+@app.route("/api/ext/connect", methods=["POST", "OPTIONS"])
+def api_ext_connect():
+    o = request.headers.get("Origin")
+    if request.method == "OPTIONS":
+        return _ext_cors(app.response_class(status=204 if o in EXT_ORIGINS else 403))
+    # Only the Playbook Connect add-on (or a same-site page) may call this.
+    if o and o not in EXT_ORIGINS and o != request.host_url.rstrip("/"):
+        return _ext_cors(jsonify({"ok": False, "code": "bad_origin", "msg": "This only works from the Playbook Connect add-on."})), 403
+    now = time.time(); ip = _ip()
+    _cf[ip] = [t for t in _cf[ip] if now - t < 3600]
+    if len(_cf[ip]) >= 15: return _ext_cors(jsonify({"ok": False, "code": "slow_down", "msg": "Too many tries. Wait a bit and try again."})), 429
+    b = request.get_json(silent=True) or {}
+    s2, swid = VAULT.clean_s2(b.get("espn_s2")), VAULT.clean_swid(b.get("swid"))
+    if not s2 or not swid:
+        return _ext_cors(jsonify({"ok": False, "code": "no_cookies", "msg": "Couldn't find your ESPN sign-in. Sign in at fantasy.espn.com in this Chrome, then try again."})), 400
+    _cf[ip].append(now)
+    season = _int(b.get("season") or ESPN.SEASON, 2018, 2100) or ESPN.SEASON
+    cookies = {"espn_s2": s2, "SWID": swid}
+    want = []
+    for x in (b.get("leagues") or [])[:10]:
+        lid = _int((x or {}).get("id") if isinstance(x, dict) else x, 1, 10**12)
+        if lid and lid not in [w["id"] for w in want]:
+            want.append({"id": lid, "tid": _int(x.get("tid"), 0, 1000) if isinstance(x, dict) else None, "from": "you"})
+    found = espn_leagues(cookies, swid, season) if b.get("discover", True) else []
+    for f in found:
+        if f["id"] not in [w["id"] for w in want]: want.append({**f, "from": "espn"})
+    res = []
+    for w in want[:10]:
+        tok = VAULT.seal(w["id"], s2, swid)
+        try: d = league_raw(w["id"], season, cookies, VAULT.tag(tok), FRIEND_TTL)
+        except ESPN.LeagueError as e:
+            code = "bad_creds" if e.code in ("private", "bad_creds") else e.code
+            res.append({"id": w["id"], "ok": False, "code": code, "from": w["from"],
+                        "msg": "ESPN says this account isn't in that league." if code == "bad_creds" else ERR_TEXT.get(code, ERR_TEXT["espn"])})
+            continue
+        info, teams = team_list(d)
+        sw = swid.upper()
+        mine = next((t["id"] for t in d.get("teams", []) if sw in [str(x).upper() for x in (t.get("owners") or [])]), None)
+        if mine is None and w.get("tid") in [t["id"] for t in teams]: mine = w["tid"]
+        me = next((t for t in teams if t["id"] == mine), None)
+        res.append({"id": w["id"], "ok": True, "season": season, "name": info["name"], "size": info["size"], "from": w["from"],
+                    "tid": mine, "team": me["name"] if me else None, "teams": [{"id": t["id"], "name": t["name"]} for t in teams], "tok": tok})
+    s2 = swid = cookies = None     # drop the codes now; only sealed tokens leave this function
+    return _ext_cors(jsonify({"ok": True, "season": season, "searched_espn": bool(b.get("discover", True)), "found_on_espn": len(found), "leagues": res}))
 
 @app.route("/api/player/<pid>")
 def api_player(pid):
