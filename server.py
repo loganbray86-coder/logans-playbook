@@ -847,7 +847,8 @@ def api_coach():
     if lg not in d["rosters"]["leagues"]: lg = next(iter(d["rosters"].get("order") or []), None)
     if lg not in d["rosters"]["leagues"]: return jsonify({"ok": False, "error": "That league isn't loaded."}), 404
     hist = b.get("history") if isinstance(b.get("history"), list) else []
-    try: out = COACH.answer(q, d, lg, hist[-6:], _ukey(ctxs))
+    gm = b.get("mode") == "gm"     # Ask GM depth for anyone, always scoped to this request's own league; never the owner webhook
+    try: out = COACH.answer(q, d, lg, hist[-6:], _ukey(ctxs), gm, b.get("brief") if gm else None)
     except Exception: return jsonify({"ok": False, "error": "Coach hit a snag. Try asking another way."}), 500
     return jsonify({"ok": True, "league": lg, **out})
 
