@@ -263,7 +263,6 @@
     "Jeremiyah Love": "O",
     "Travis Etienne Jr.": "IR",
     "Tyler Warren": "O",
-    "Tyjae Spears": "Q",
     "Michael Pittman Jr.": "IR",
     "Jacory Croskey-Merritt": "O",
     "Lamar Jackson": "O",
@@ -475,7 +474,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 16:10 UTC",
+   "last_synced": "2026-10-18 16:17 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1121,7 +1120,6 @@
     "Alec Pierce": "IR",
     "Rashee Rice": "O",
     "DJ Moore": "Q",
-    "Tyjae Spears": "Q",
     "Zach Charbonnet": "O",
     "Pat Bryant": "IR",
     "Case Keenum": "O"
@@ -1331,7 +1329,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 16:10 UTC",
+   "last_synced": "2026-10-18 16:17 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1691,5 +1689,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 16:15 UTC"
+ "last_synced": "2026-10-18 16:17 UTC"
 }
