@@ -112,7 +112,7 @@
     "Lamarvelous": [
      "Jacoby Brissett",
      "Braelon Allen",
-     "Dameon Pierce",
+     "Woody Marks",
      "Rome Odunze",
      "Josh Downs",
      "Tucker Kraft",
@@ -125,7 +125,7 @@
      "Wan'Dale Robinson",
      "Jared Goff",
      "Ollie Gordon II",
-     "Woody Marks"
+     "Dameon Pierce"
     ],
     "ZWEST": [
      "Amon-Ra St. Brown",
@@ -309,10 +309,10 @@
     "me": 6.0,
     "opp": "Can’t touch this",
     "opp_score": 4.48,
-    "me_proj": 103.9,
+    "me_proj": 102.2,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-18 07:20 UTC"
+    "as_of": "2026-10-18 07:50 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -348,7 +348,7 @@
     },
     {
      "slot": "RB",
-     "player": "Dameon Pierce"
+     "player": "Woody Marks"
     },
     {
      "slot": "WR",
@@ -486,7 +486,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 07:20 UTC",
+   "last_synced": "2026-10-18 07:50 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -1160,7 +1160,7 @@
     "me_proj": 110.0,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-18 07:20 UTC"
+    "as_of": "2026-10-18 07:50 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1351,7 +1351,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 07:20 UTC",
+   "last_synced": "2026-10-18 07:50 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1711,5 +1711,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 07:20 UTC"
+ "last_synced": "2026-10-18 07:50 UTC"
 }
