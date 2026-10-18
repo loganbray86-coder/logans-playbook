@@ -216,9 +216,9 @@
      "Jonah Coleman",
      "Keaton Mitchell",
      "Antonio Williams",
-     "DST:DAL",
      "Matt Gay",
-     "Kirk Cousins"
+     "Kirk Cousins",
+     "DST:SF"
     ],
     "Kahbillz": [
      "Jonathan Taylor",
@@ -475,7 +475,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 17:54 UTC",
+   "last_synced": "2026-10-18 18:04 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1332,7 +1332,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 17:54 UTC",
+   "last_synced": "2026-10-18 18:04 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1692,5 +1692,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 17:54 UTC"
+ "last_synced": "2026-10-18 18:04 UTC"
 }
