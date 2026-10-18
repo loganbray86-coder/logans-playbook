@@ -272,6 +272,7 @@
     "Jordan Addison": "Q",
     "Jordan Mason": "IR",
     "Kyle Monangai": "O",
+    "Ladd McConkey": "O",
     "Lamar Jackson": "O",
     "Michael Pittman Jr.": "IR",
     "Mike Evans": "Q",
@@ -1105,6 +1106,7 @@
     "Jordan Mason": "IR",
     "Jordyn Tyson": "IR",
     "Kyle Monangai": "O",
+    "Ladd McConkey": "O",
     "Lamar Jackson": "O",
     "Michael Pittman Jr.": "IR",
     "Mike Evans": "Q",
@@ -1690,5 +1692,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 20:28 UTC"
+ "last_synced": "2026-10-18 21:11 UTC"
 }
