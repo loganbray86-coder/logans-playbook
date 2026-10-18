@@ -195,7 +195,6 @@
      "Matthew Stafford",
      "Mark Andrews",
      "DST:PHI",
-     "T.J. Hockenson",
      "Dylan Sampson",
      "Keenan Allen",
      "Cairo Santos",
@@ -281,7 +280,6 @@
     "Romeo Doubs": "O",
     "Saquon Barkley": "O",
     "Stefon Diggs": "Q",
-    "T.J. Hockenson": "Q",
     "Tank Dell": "IR",
     "Terrance Ferguson": "IR",
     "Travis Etienne Jr.": "IR",
@@ -474,7 +472,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 19:19 UTC",
+   "last_synced": "2026-10-18 19:28 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -646,7 +644,6 @@
     "Saquon Barkley": 3929630,
     "Spencer Shrader": 4571557,
     "Stefon Diggs": 2976212,
-    "T.J. Hockenson": 4036133,
     "Tank Dell": 4366031,
     "Tee Higgins": 4239993,
     "Terrance Ferguson": 4570037,
@@ -1332,7 +1329,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 19:19 UTC",
+   "last_synced": "2026-10-18 19:28 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1692,5 +1689,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 19:19 UTC"
+ "last_synced": "2026-10-18 19:28 UTC"
 }
