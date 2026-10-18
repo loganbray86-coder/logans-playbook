@@ -188,7 +188,6 @@
      "Josh Allen",
      "Brock Bowers",
      "Bucky Irving",
-     "DJ Moore",
      "Tony Pollard",
      "Jaylen Warren",
      "Stefon Diggs",
@@ -199,7 +198,8 @@
      "T.J. Hockenson",
      "Dylan Sampson",
      "Keenan Allen",
-     "Cairo Santos"
+     "Cairo Santos",
+     "Keon Coleman"
     ],
     "Papa Smurf": [
      "Christian McCaffrey",
@@ -258,7 +258,6 @@
     "Adonai Mitchell": "O",
     "Alec Pierce": "IR",
     "Breece Hall": "O",
-    "DJ Moore": "O",
     "David Montgomery": "O",
     "De'Zhaun Stribling": "IR",
     "Deebo Samuel Sr.": "O",
@@ -475,7 +474,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 18:58 UTC",
+   "last_synced": "2026-10-18 19:19 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -517,7 +516,6 @@
     "Colston Loveland": 4723086,
     "Courtland Sutton": 3128429,
     "D'Andre Swift": 4259545,
-    "DJ Moore": 3915416,
     "DK Metcalf": 4047650,
     "DST:BAL": -16033,
     "DST:CAR": -16029,
@@ -674,7 +672,8 @@
     "Woody Marks": 4429059,
     "Xavier Worthy": 4683062,
     "Zach Charbonnet": 4426385,
-    "Zay Flowers": 4429615
+    "Zay Flowers": 4429615,
+    "Keon Coleman": 4635008
    },
    "waiver": {
     "rank": 12,
@@ -1333,7 +1332,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 18:58 UTC",
+   "last_synced": "2026-10-18 19:19 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1693,5 +1692,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 18:58 UTC"
+ "last_synced": "2026-10-18 19:19 UTC"
 }
