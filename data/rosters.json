@@ -142,7 +142,6 @@
      "Tank Dell",
      "Daniel Jones",
      "Brian Robinson Jr.",
-     "Caleb Douglas",
      "Dontayvion Wicks",
      "Deshaun Watson"
     ],
@@ -261,11 +260,9 @@
     "Kyle Monangai": "O",
     "Rashee Rice": "O",
     "Jonathon Brooks": "IR",
-    "Pat Freiermuth": "Q",
     "Jeremiyah Love": "O",
     "Travis Etienne Jr.": "IR",
     "Tyler Warren": "O",
-    "Caleb Williams": "Q",
     "Tyjae Spears": "Q",
     "Michael Pittman Jr.": "IR",
     "Jacory Croskey-Merritt": "O",
@@ -274,7 +271,6 @@
     "Mike Evans": "Q",
     "David Montgomery": "O",
     "Tank Dell": "IR",
-    "Caleb Douglas": "Q",
     "Saquon Barkley": "O",
     "Quinshon Judkins": "O",
     "Alec Pierce": "IR",
@@ -287,7 +283,6 @@
     "Stefon Diggs": "Q",
     "T.J. Hockenson": "Q",
     "Dylan Sampson": "IR",
-    "Rico Dowdle": "Q",
     "De'Zhaun Stribling": "IR",
     "Jonah Coleman": "IR",
     "Jayden Reed": "IR",
@@ -480,7 +475,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 15:43 UTC",
+   "last_synced": "2026-10-18 15:58 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -506,7 +501,6 @@
     "Bucky Irving": 4596448,
     "C.J. Stroud": 4432577,
     "Cairo Santos": 17427,
-    "Caleb Douglas": 4869645,
     "Caleb Williams": 4431611,
     "Cam Little": 4686361,
     "Cam Skattebo": 4696981,
@@ -1107,7 +1101,6 @@
     "Tank Dell": "IR",
     "Jordan Addison": "Q",
     "Jacory Croskey-Merritt": "O",
-    "Pat Freiermuth": "Q",
     "Stefon Diggs": "Q",
     "Will Shipley": "IR",
     "Kyle Monangai": "O",
@@ -1117,7 +1110,6 @@
     "Quinshon Judkins": "O",
     "Caleb Douglas": "Q",
     "Tyler Warren": "O",
-    "Caleb Williams": "Q",
     "T.J. Hockenson": "Q",
     "Isiah Pacheco": "IR",
     "David Montgomery": "O",
@@ -1129,10 +1121,10 @@
     "Alec Pierce": "IR",
     "Rashee Rice": "O",
     "DJ Moore": "Q",
-    "Rico Dowdle": "Q",
     "Tyjae Spears": "Q",
     "Zach Charbonnet": "O",
-    "Pat Bryant": "IR"
+    "Pat Bryant": "IR",
+    "Case Keenum": "O"
    },
    "record": "2-3 (10th of 16)",
    "untouchable": [
@@ -1339,7 +1331,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 15:43 UTC",
+   "last_synced": "2026-10-18 15:58 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1699,5 +1691,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 15:43 UTC"
+ "last_synced": "2026-10-18 15:58 UTC"
 }
