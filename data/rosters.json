@@ -1114,7 +1114,7 @@
     "Pat Bryant": "IR",
     "Quinshon Judkins": "O",
     "Rashee Rice": "O",
-    "Rashod Bateman": "Q",
+    "Rashod Bateman": "O",
     "Roman Wilson": "IR",
     "Romeo Doubs": "Q",
     "Saquon Barkley": "O",
@@ -1333,7 +1333,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 18:40 UTC",
+   "last_synced": "2026-10-18 18:47 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1693,5 +1693,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 18:40 UTC"
+ "last_synced": "2026-10-18 18:47 UTC"
 }
