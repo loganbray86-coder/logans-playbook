@@ -312,7 +312,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-17 23:04 UTC"
+    "as_of": "2026-10-18 07:07 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -486,7 +486,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-17 23:04 UTC",
+   "last_synced": "2026-10-18 07:07 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -795,8 +795,8 @@
     ],
     "Hall Pass": [
      "Matthew Stafford",
-     "Chase Brown",
      "RJ Harvey",
+     "Roschon Johnson",
      "Wan'Dale Robinson",
      "Jakobi Meyers",
      "Jaylin Noel",
@@ -804,12 +804,12 @@
      "CeeDee Lamb",
      "DST:CAR",
      "Dominic Zvada",
+     "Chase Brown",
      "Breece Hall",
      "Jalen Hurts",
      "Adonai Mitchell",
      "Samaje Perine",
      "DST:MIN",
-     "Chris Bell",
      "Jordyn Tyson"
     ],
     "Krista's Cutthroat Crew": [
@@ -1157,10 +1157,10 @@
     "me": 14.6,
     "opp": "Jacob's Legal Defense",
     "opp_score": 25.4,
-    "me_proj": 102.9,
+    "me_proj": 110.0,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-17 23:04 UTC"
+    "as_of": "2026-10-18 07:07 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1170,11 +1170,11 @@
     },
     {
      "slot": "RB",
-     "player": "Chase Brown"
+     "player": "RJ Harvey"
     },
     {
      "slot": "RB",
-     "player": "RJ Harvey"
+     "player": "Roschon Johnson"
     },
     {
      "slot": "WR",
@@ -1351,7 +1351,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-17 23:04 UTC",
+   "last_synced": "2026-10-18 07:07 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1382,9 +1382,9 @@
     "Jordyn Tyson": 4880281,
     "Samaje Perine": 3116389,
     "DST:MIN": -16016,
-    "Chris Bell": 4869961,
     "Dominic Zvada": 5082424,
     "DST:CAR": -16029,
+    "Roschon Johnson": 4426386,
     "Jonathan Taylor": 4242335,
     "Nico Collins": 4258173,
     "Tee Higgins": 4239993,
@@ -1710,6 +1710,6 @@
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
- "as_of": "2026-10-17",
- "last_synced": "2026-10-17 23:04 UTC"
+ "as_of": "2026-10-18",
+ "last_synced": "2026-10-18 07:07 UTC"
 }
