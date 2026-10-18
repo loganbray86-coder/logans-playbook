@@ -1105,6 +1105,7 @@
     "Jordyn Tyson": "IR",
     "Kyle Monangai": "O",
     "Lamar Jackson": "O",
+    "Makai Lemon": "Q",
     "Michael Pittman Jr.": "IR",
     "Mike Evans": "Q",
     "Pat Bryant": "IR",
@@ -1329,7 +1330,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 19:28 UTC",
+   "last_synced": "2026-10-18 19:36 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1689,5 +1690,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 19:28 UTC"
+ "last_synced": "2026-10-18 19:36 UTC"
 }
