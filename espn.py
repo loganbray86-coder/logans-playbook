@@ -36,7 +36,20 @@ def pname(e):
     if pos == "DST": return "DST:" + PRO.get(p.get("proTeamId"), "?"), p, pos
     return p.get("fullName") or str(p.get("id")), p, pos
 
-def convert(lkey, d, base):
+def _wk_pts(p, period):
+    """(ESPN projection, actual) for this scoring period, league-scored appliedTotal. None when absent."""
+    pr = ac = None
+    for s in p.get("stats") or []:
+        if s.get("scoringPeriodId") != period or s.get("statSplitTypeId") != 1: continue
+        v = s.get("appliedTotal")
+        if v is None: continue
+        if s.get("statSourceId") == 1: pr = round(v, 2)
+        elif s.get("statSourceId") == 0 and (s.get("stats") or v): ac = round(v, 2)
+    return pr, ac
+
+def convert(lkey, d, base, extra=False):
+    """extra=True (live app only) adds per-player ESPN week projections/actuals and every team's starters.
+    The sync routine calls convert() without it, so data/rosters.json keeps its exact shape."""
     lid, myid = LEAGUES[lkey]
     L = copy.deepcopy(base or {})
     members = {m["id"]: ("%s %s" % (m.get("firstName", ""), m.get("lastName", ""))).strip() or m.get("displayName", "") for m in d.get("members", [])}
@@ -138,6 +151,14 @@ def convert(lkey, d, base):
                    "waiver_hours": acq.get("waiverHours"), "order_type": acq.get("waiverOrderReset"),
                    "last_run": d.get("status", {}).get("waiverLastExecutionDate"),
                    "order": [{"team": byid.get(t["id"]), "rank": t.get("waiverRank")} for t in sorted(d.get("teams", []), key=lambda t: t.get("waiverRank") or 99)]}
+    if extra:
+        wkp, starters = {}, {}
+        for tid, lst in teams.items():
+            starters[byid[tid]] = [nm for slot, nm, _, _ in lst if slot not in (20, 21)]
+            for slot, nm, p, _ in lst:
+                pr, ac = _wk_pts(p, period)
+                wkp[nm] = {"e": pr, "a": ac, "t": PRO.get(p.get("proTeamId"), "FA")}
+        L["wkp"] = wkp; L["starters"] = starters; L["wkp_period"] = period
     L["source"] = "espn"
     return L
 
@@ -148,7 +169,7 @@ def live_rosters(base, cache_fn, ttl):
         if not creds():
             src[k] = {"live": False, "reason": "no credentials"}; R["leagues"][k]["source"] = "cached"; continue
         def f(k=k):
-            return convert(k, fetch(LEAGUES[k][0]), base["leagues"].get(k))
+            return convert(k, fetch(LEAGUES[k][0]), base["leagues"].get(k), extra=True)
         v = cache_fn("espn:" + k, ttl, f)
         if v: R["leagues"][k] = v; src[k] = {"live": True}
         else: R["leagues"][k]["source"] = "cached"; src[k] = {"live": False, "reason": "ESPN error"}

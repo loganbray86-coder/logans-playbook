@@ -3,6 +3,7 @@ import requests
 import adv as ADV
 import espn as ESPN
 import cards as CARDS
+import fpproj as FPP
 from flask import Flask, jsonify, send_from_directory, request
 BASE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
@@ -152,12 +153,108 @@ def rosters_file():
 def espn_ttl(): return 60 if in_nfl_window() else 120
 def rosters(): return ESPN.live_rosters(rosters_file(), cached, espn_ttl())
 
+TEAM_FULL = {}            # FP team code -> full name (from FP D/ST names)
+ESPN2FP = {"JAX": "JAC", "WSH": "WAS", "LA": "LAR"}
+FP_WEEK = {"wk": None}
+def fp_team(t): return ESPN2FP.get(t, t) if t else t
+
+def espn_defaults(wk):
+    """ESPN default-PPR week projection for any player (public pool), keyed by ESPN id and D/ST team."""
+    out = {}
+    try:
+        for p in CARDS.global_pool(cached, wk) or []:
+            if p.get("proj") is None: continue
+            out[("dst:" + fp_team(p["team"])) if p["pos"] == "DST" else p["id"]] = p["proj"]
+    except Exception: pass
+    return out
+
+def attach_projections(players, R, cur, lname):
+    """ESPN (league-scored when live) + FantasyPros PPR projections on every player, and both
+    matchup projections. FP values come only from FantasyPros pages; unmatched -> None."""
+    now = time.time()
+    try: ewk = CARDS.week_now(cached)
+    except Exception: ewk = cur
+    ed = espn_defaults(ewk) if ewk == cur else {}
+    for e in players.values():
+        v = ed.get("dst:" + str(e.get("team"))) if e.get("pos") == "DST" else ed.get(e.get("espn_id"))
+        if v is not None: e["espn_proj"] = v
+    # ESPN league projections/actuals for rostered players
+    mine_opp = set()
+    for lid, L in R["leagues"].items():
+        wkp = L.get("wkp") or {}
+        if L.get("wkp_period") not in (None, cur): wkp = {}
+        for tname, nmap in lname.get(lid, {}).items():
+            for n, e in nmap.items():
+                x = wkp.get(n)
+                if x:
+                    e.setdefault("ep", {})[lid] = x.get("e"); e.setdefault("ea", {})[lid] = x.get("a")
+                    if x.get("t") and not e.get("team_espn"): e["team_espn"] = x["t"]
+        opp = (L.get("matchup") or {}).get("opp")
+        for t in (L.get("my_team"), opp):
+            for e in lname.get(lid, {}).get(t, {}).values(): mine_opp.add(e["key"])
+    # FantasyPros: which players to keep fresh
+    want = {}
+    def locked(e):
+        if any(v is not None for v in (e.get("ea") or {}).values()): return True
+        if e.get("game_status") not in (None, "", "scheduled", "created"): return True
+        return bool(e.get("kickoff") and float(e["kickoff"]) < now)
+    for e in players.values():
+        rostered = bool(e.get("owners"))
+        wkr = (e.get("wk") or {}).get("rank")
+        lim = {"QB": 40, "RB": 70, "WR": 90, "TE": 40, "K": 40, "DST": 40}.get(e.get("pos"))
+        if not rostered and not (wkr is not None and lim and int(wkr) <= lim): continue
+        if str(e.get("bye")) == str(cur): continue        # bye: no game, nothing to project
+        slug, guess = e.get("fp_slug"), False
+        if not slug and rostered and e.get("pos") != "DST":
+            slug, guess = FPP.guess_slug(e["name"]), True
+        if not slug: continue
+        e["fp_slug"] = slug
+        prio = 0 if e["key"] in mine_opp else 1 if rostered else 2
+        tf = TEAM_FULL.get(fp_team(e.get("team_espn") or e.get("team"))) if guess else None
+        want[slug] = {"name": e["name"], "pos": e.get("pos"), "prio": prio, "guess": guess, "team_full": tf, "locked": locked(e)}
+    FP_WEEK["wk"] = cur
+    FPP.want(want, lambda: FP_WEEK["wk"])
+    for e in players.values():
+        if e.get("fp_slug"):
+            v = FPP.value(e["fp_slug"], cur)
+            if v is not None: e["fpp"] = v
+    # matchup projections: starters only; played/in-progress players count their actual points (as ESPN does)
+    for lid, L in R["leagues"].items():
+        m = L.get("matchup")
+        if not m: continue
+        st = L.get("starters") or {}
+        def tot(team, names):
+            nmap = lname.get(lid, {}).get(team, {})
+            if names is None: return None
+            r = {"espn": 0.0, "fp": 0.0, "fp_pre": 0.0, "fp_missing": [], "espn_missing": [], "n": 0}
+            for n in names:
+                if not n or n == "(empty)": continue
+                e = nmap.get(n); r["n"] += 1
+                if not e: r["fp_missing"].append(n); r["espn_missing"].append(n); continue
+                act = (e.get("ea") or {}).get(lid); ep = (e.get("ep") or {}).get(lid)
+                bye = str(e.get("bye")) == str(cur)
+                fpv = 0.0 if bye else e.get("fpp")
+                r["espn"] += act if act is not None else (ep or 0.0)
+                if ep is None and act is None and not bye: r["espn_missing"].append(n)
+                if fpv is None: r["fp_missing"].append(n)
+                else: r["fp_pre"] += fpv
+                if act is not None: r["fp"] += act
+                elif fpv is not None: r["fp"] += fpv
+            for k in ("espn", "fp", "fp_pre"): r[k] = round(r[k], 1)
+            return r
+        me_names = [x.get("player") for x in (L.get("lineup") or [])] or st.get(L.get("my_team"))
+        m["proj2"] = {"me": tot(L.get("my_team"), me_names), "opp": tot(m.get("opp"), st.get(m.get("opp"))),
+                      "fp_week": cur, "fp_status": FPP.status(cur)}
+
 def build():
     players = {}
     def get(p, pos):
         key = norm(p["player_name"]) + "|" + pos
         if pos == "DST": key = "dst:" + p["player_team_id"]
         e = players.setdefault(key, {"key": key, "name": p["player_name"], "pos": pos, "team": p.get("player_team_id"), "bye": p.get("player_bye_week")})
+        fn = p.get("player_filename") or ""
+        if fn.endswith(".php") and not e.get("fp_slug"): e["fp_slug"] = fn[:-4]
+        if pos == "DST" and p.get("player_team_id"): TEAM_FULL[p["player_team_id"]] = p["player_name"]
         return e
     meta = {}
     for pos, page in WEEKLY.items():
@@ -221,14 +318,14 @@ def build():
             mates = sorted(x for x in depth.get(ADV.canon(e["team"]), []) if x[1] != norm(e["name"]))
             if mates: e["cuff"] = nmap.get(mates[0][1], mates[0][1].title())
     # rosters
-    R = rosters(); unmatched = {}
+    R = rosters(); unmatched = {}; lname = {}
     lastk = {}
     for e in players.values():
         if e["pos"] == "K": lastk.setdefault(norm(e["name"]).split()[-1], []).append(e)
     for lid, L in R["leagues"].items():
         for tname, lst in L["teams"].items():
             for n in lst:
-                if n.startswith("DST:"): e = players.get("dst:" + n[4:])
+                if n.startswith("DST:"): e = players.get("dst:" + n[4:]) or players.get("dst:" + fp_team(n[4:]))
                 elif n.startswith("K:"):
                     c = lastk.get(norm(n[2:]), []); e = c[0] if len(c) == 1 else None
                 else:
@@ -237,9 +334,13 @@ def build():
                     k = "unranked:" + norm(n); e = players.setdefault(k, {"key": k, "name": n, "pos": "?", "unranked": True})
                     unmatched.setdefault(lid, []).append(n)
                 e.setdefault("owners", {})[lid] = tname
+                lname.setdefault(lid, {}).setdefault(tname, {})[n] = e
                 R.setdefault("resolved", {}).setdefault(lid, {}).setdefault(tname, []).append(e["key"])
     advd = cached("adv", 21600, lambda: ADV.build_adv(norm)); extra = {}
     cur = int(meta.get("weekly", {}).get("week") or 1)
+    try: attach_projections(players, R, cur, lname)
+    except Exception as ex: STATUS["projections"] = {"ok": False, "error": str(ex)[:200], "fetched": _stamp()}
+    else: STATUS["fp_proj"] = {"ok": True, "fetched": _stamp(), **FPP.status(cur)}
     if advd:
         for e in players.values():
             a = advd["players"].get(norm(e["name"]) + "|" + str(e["pos"]))
@@ -334,7 +435,7 @@ def api_docs():
     return """<html><body style="background:#0b0f17;color:#e8edf5;font-family:sans-serif;padding:20px;max-width:800px">
 <h1>Logan's Playbook JSON API</h1><p>Nothing here writes to ESPN. ESPN is only ever read.</p>
 <h3>GET /api/data</h3><p>Everything the app uses. Add <code>?refresh=1</code> to force a blocking rebuild. Otherwise public sources (FantasyPros, FantasyCalc, Sleeper, schedule, news, build) use a 15 min TTL (5 min for scores/news during Thu/Sun/Mon NFL windows). Expired cache is served immediately and refreshed in a background thread. nflverse adv stays ~6 h.</p>
-<ul><li><b>players[]</b>: key, name, pos, team, bye, opp, own (FP avg roster %), wk {rank,pos_rank,pts (FP PPR projection),best,worst,avg,std,grade,delta}, ros {overall,pos_rank,pos_num,...}, rt (RotoTrade seed), fc12/fc16 (FantasyCalc), inj/inj_part/inj_note (Sleeper), adv {g,ppg,tgt_g,ts,ay_g,touch_g,snap,last3[],trend,trend_val,tot{}} (nflverse), cuff (Sleeper depth chart RB2), owners {WAN|SLOPE: team}</li>
+<ul><li><b>players[]</b>: key, name, pos, team, bye, opp, own (FP avg roster %), wk {rank,pos_rank,pts (FP PPR projection),best,worst,avg,std,grade,delta}, ros {overall,pos_rank,pos_num,...}, rt (RotoTrade seed), fc12/fc16 (FantasyCalc), inj/inj_part/inj_note (Sleeper), adv {g,ppg,tgt_g,ts,ay_g,touch_g,snap,last3[],trend,trend_val,tot{}} (nflverse), cuff (Sleeper depth chart RB2), owners {WAN|SLOPE: team}, <b>fpp</b> (FantasyPros Week PPR projection from FP projection pages; absent = no match), <b>ep</b>/<b>ea</b> {league: ESPN league-scored week projection / actual}, espn_proj (ESPN default PPR, public pool)</li><li><b>rosters.leagues[lg].matchup.proj2</b>: {me,opp: {espn, fp, fp_pre, fp_missing[], n}} starters only; played players count actual points</li>
 <li><b>fpa</b>: {pos:{team:{fpa,rank}}} PPR points allowed per game (rank 32 = most allowed)</li><li><b>sched</b>: {team:{week:"vs OPP"|"@OPP"}} weeks cur..17 from ESPN</li>
 <li><b>sos</b>: {team:{pos:{ros|wan_po|slope_po:{avg_rank,grade}}}}</li><li><b>team_stats</b>: {team:{off_ppg,give_g}}</li>
 <li><b>rosters</b>, <b>meta</b>, <b>status</b> (per-source ok/fetched), cur_week, adv_season, adv_thru, rt_as_of, unmatched</li></ul>
