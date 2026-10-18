@@ -94,11 +94,17 @@ def global_pool(cached, wk):
         return [slim(p, wk) for p in d]
     return cached("gpool:%d" % wk, 900, f) or []
 
-def league_pool(cached, lkey, wk):
-    """Available players (FA + waivers) in one league with league scoring + waiver dates. Needs cookies."""
+def ctx_for(lkey):
+    """Logan's built-in leagues (WAN/SLOPE) with server env cookies."""
+    if lkey not in ESPN.LEAGUES: return None
     ck = _cookies()
-    if not ck: return None
-    lid = ESPN.LEAGUES[lkey][0]
+    return {"key": lkey, "lid": ESPN.LEAGUES[lkey][0], "cookies": ck, "ctag": "env" if ck else None}
+
+def league_pool(cached, ctx, wk):
+    """Available players (FA + waivers) in one league with league scoring + waiver dates.
+    ctx: {key, lid, cookies (None = public league, no cookies), ctag (cache tag; None = can't read)}."""
+    if not ctx or not ctx.get("ctag"): return None
+    lid, ck = ctx["lid"], ctx.get("cookies")
     def f():
         flt = {"players": {"filterStatus": {"value": ["FREEAGENT", "WAIVERS"]}, "filterSlotIds": {"value": [0, 2, 4, 6, 16, 17, 23]},
                            "sortPercOwned": {"sortPriority": 1, "sortAsc": False}, "limit": 400,
@@ -114,16 +120,16 @@ def league_pool(cached, lkey, wk):
             s["waiver_until"] = wd
             out.append(s)
         return out
-    return cached("lpool:%s:%d" % (lkey, wk), 180, f)
+    return cached("u:lpool:%s:%s:%d" % (lid, ctx["ctag"], wk), 180, f)
 
 def rostered_ids(L):
     return {int(v) for v in (L.get("pids") or {}).values() if v is not None}
 
-def available(cached, lkey, R, wk):
+def available(cached, ctx, R, wk):
     """Returns (players, source). Prefer the league call (exact FA/WA status); fall back to global minus rosters."""
-    L = R["leagues"][lkey]
+    L = R["leagues"][ctx["key"]]
     lp = None
-    try: lp = league_pool(cached, lkey, wk)
+    try: lp = league_pool(cached, ctx, wk)
     except Exception: lp = None
     if lp:
         return lp, "espn-league"
@@ -154,9 +160,10 @@ def next_waiver(W):
             if t > now: return int(t.timestamp() * 1000)
     return None
 
-def waivers(cached, lkey, R, wk, sched):
+def waivers(cached, ctx, R, wk, sched):
+    lkey = ctx["key"]
     L = R["leagues"][lkey]
-    pl, src = available(cached, lkey, R, wk)
+    pl, src = available(cached, ctx, R, wk)
     pl = [p for p in pl if p["pos"] in ("QB", "RB", "WR", "TE", "K", "DST")]
     for p in pl:
         g = (sched.get(str(p["pro_id"])) or {}).get("games", {}).get(str(wk))
@@ -241,8 +248,8 @@ def gamelog_events(cached, pid):
     try: return cached("glog:%s" % pid, 900, f) or {}
     except Exception: return {}
 
-def card(cached, pid, lkey, R, wk, sched):
-    pid = int(pid)
+def card(cached, pid, ctx, R, wk, sched):
+    pid = int(pid); lkey = (ctx or {}).get("key")
     def f():
         flt = {"filterIds": {"value": [pid]}, "filterStatsForTopScoringPeriodIds": {"value": 18, "additionalValue": _stat_ids(wk)}}
         d = _get(G + "/players?scoringPeriodId=%d&view=kona_playercard" % wk, flt)
@@ -259,13 +266,13 @@ def card(cached, pid, lkey, R, wk, sched):
     if not raw: return None
     # league-scored version when cookies exist (applied totals use THIS league's scoring)
     lraw, lstatus = None, None
-    ck = _cookies()
-    if ck and lkey in ESPN.LEAGUES:
+    if ctx and ctx.get("ctag"):
+        ck = ctx.get("cookies")
         def lf():
             flt = {"players": {"filterIds": {"value": [pid]}, "filterStatsForTopScoringPeriodIds": {"value": 18, "additionalValue": _stat_ids(wk)}}}
-            d = _get(LG % ESPN.LEAGUES[lkey][0] + "?scoringPeriodId=%d&view=kona_playercard" % wk, flt, ck)
+            d = _get(LG % ctx["lid"] + "?scoringPeriodId=%d&view=kona_playercard" % wk, flt, ck)
             return (d.get("players") or [None])[0]
-        try: lraw = cached("lcard:%s:%s:%d" % (lkey, pid, wk), 300, lf)
+        try: lraw = cached("u:lcard:%s:%s:%s:%d" % (ctx["lid"], ctx["ctag"], pid, wk), 300, lf)
         except Exception: lraw = None
     src = (lraw or {}).get("player") or raw
     ex = {}
@@ -288,7 +295,7 @@ def card(cached, pid, lkey, R, wk, sched):
             lg["status"] = lstatus["status"]; lg["waiver_until"] = lstatus.get("waiver_until")
         else:
             lg["status"] = "FREEAGENT"; lg["unverified"] = True
-    # slot in Logan's lineup
+    # slot in the user's lineup
     if lg["mine"]:
         lg["slot"] = next((x["slot"] for x in (L.get("lineup") or []) if x.get("player") == nm), None) or ("IR" if nm in (L.get("ir") or []) else "BE")
     # game log (1..18), schedule

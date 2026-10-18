@@ -1,5 +1,8 @@
-import json, re, time, os, threading, unicodedata
+import json, re, time, os, threading, unicodedata, hashlib
 import requests
+import vault as VAULT
+import coach as COACH
+APP_VERSION = "2.0.0-friends"
 import adv as ADV
 import espn as ESPN
 import cards as CARDS
@@ -43,6 +46,7 @@ def _store(key, v, ok=True, error=None):
     with _lock:
         _cache[key] = (now, v)
         _refreshing.discard(key)
+    if key.startswith("u:"): return v      # per-user/per-league entries stay out of the public /api/status
     st = {"ok": ok, "fetched": _stamp()}
     if error: st["error"] = error
     STATUS[key] = st
@@ -60,7 +64,7 @@ def _run_refresh(key, fn):
             with _lock:
                 stale = _cache.get(key)
                 _refreshing.discard(key)
-            STATUS[key] = {"ok": False, "error": str(e)[:200], "fetched": _stamp()}
+            if not key.startswith("u:"): STATUS[key] = {"ok": False, "error": str(e)[:200], "fetched": _stamp()}
             return stale[1] if stale else None
     finally:
         _refresh_depth.on = prev
@@ -112,13 +116,14 @@ def fp_page(page):
     return cached("fp:" + page, public_ttl(), f)
 
 def fc(teams):
-    return cached(f"fc{teams}", public_ttl(), lambda: requests.get(
+    # FantasyCalc API terms: cache and refresh each query no more than once every 3 hours, with attribution.
+    return cached(f"fc{teams}", 3 * 3600, lambda: requests.get(
         f"https://api.fantasycalc.com/values/current?isDynasty=false&numQbs=1&numTeams={teams}&ppr=1", headers=UA, timeout=20).json())
 
 def sleeper():
     path = os.path.join(BASE, "cache", "sleeper_slim.json")
     def f():
-        if os.path.exists(path) and time.time() - os.path.getmtime(path) < public_ttl():
+        if os.path.exists(path) and time.time() - os.path.getmtime(path) < 86400:   # Sleeper docs: full player list at most once a day
             return json.load(open(path))
         raw = requests.get("https://api.sleeper.app/v1/players/nfl", timeout=60).json()
         slim = {}
@@ -127,7 +132,7 @@ def sleeper():
             if not p.get("team"): continue
             slim[norm(p["full_name"]) + "|" + p["position"]] = {k: p.get(k) for k in ("injury_status", "injury_body_part", "injury_notes", "status", "team", "news_updated", "depth_chart_order", "espn_id")}
         json.dump(slim, open(path, "w")); return slim
-    return cached("sleeper", public_ttl(), f)
+    return cached("sleeper", 86400, f)
 
 def espn_ids():
     def f():
@@ -151,7 +156,7 @@ def rosters_file():
     mock = os.environ.get("LP_MOCK_ROSTERS")  # local testing only: a saved copy of live rosters
     return json.load(open(mock if mock and os.path.exists(mock) else os.path.join(BASE, "data", "rosters.json")))
 def espn_ttl(): return 60 if in_nfl_window() else 120
-def rosters(): return ESPN.live_rosters(rosters_file(), cached, espn_ttl())
+def rosters(): return ESPN.live_rosters(rosters_file(), cached, espn_ttl())   # legacy (sync tools)
 
 TEAM_FULL = {}            # FP team code -> full name (from FP D/ST names)
 ESPN2FP = {"JAX": "JAC", "WSH": "WAS", "LA": "LAR"}
@@ -246,7 +251,9 @@ def attach_projections(players, R, cur, lname):
         m["proj2"] = {"me": tot(L.get("my_team"), me_names), "opp": tot(m.get("opp"), st.get(m.get("opp"))),
                       "fp_week": cur, "fp_status": FPP.status(cur)}
 
-def build():
+def build_base():
+    """Everything that is the same for every user: FantasyPros, FantasyCalc, RotoTrade, Sleeper,
+    ESPN ids, nflverse, schedule. Built once and shared; no rosters in here."""
     players = {}
     def get(p, pos):
         key = norm(p["player_name"]) + "|" + pos
@@ -317,8 +324,30 @@ def build():
         if e["pos"] == "RB" and e.get("team"):
             mates = sorted(x for x in depth.get(ADV.canon(e["team"]), []) if x[1] != norm(e["name"]))
             if mates: e["cuff"] = nmap.get(mates[0][1], mates[0][1].title())
-    # rosters
-    R = rosters(); unmatched = {}; lname = {}
+    advd = cached("adv", 21600, lambda: ADV.build_adv(norm)); extra = {}
+    cur = int(meta.get("weekly", {}).get("week") or 1)
+    if advd:
+        for e in players.values():
+            a = advd["players"].get(norm(e["name"]) + "|" + str(e["pos"]))
+            if a: e["adv"] = a
+        sched = cached("sched", public_ttl(), lambda: ADV.schedule(cur))
+        extra = {"team_stats": advd["teams"], "adv_season": advd["season"], "adv_thru": advd["thru_week"], "fpa": advd["fpa"]}
+        if sched:
+            extra["sched"] = sched; extra["sos"] = ADV.sos(sched, advd["fpa"], cur)
+    return {"players": players, "meta": meta, "extra": extra, "cur": cur, "rt_as_of": rt["as_of"], "built": time.time()}
+
+def base():
+    return cached("base", public_ttl(), build_base)
+
+def build_for(ctxs):
+    """One user's view: shared base + their leagues' live rosters, projections and matchups."""
+    B = base()
+    if not B: raise RuntimeError("player data still loading")
+    players = {k: dict(e) for k, e in B["players"].items()}   # base entries never hold per-league fields
+    meta, cur = B["meta"], B["cur"]
+    byname = {}
+    for e in players.values(): byname.setdefault(norm(e["name"]), []).append(e)
+    R = assemble_R(ctxs); unmatched = {}; lname = {}
     lastk = {}
     for e in players.values():
         if e["pos"] == "K": lastk.setdefault(norm(e["name"]).split()[-1], []).append(e)
@@ -336,38 +365,235 @@ def build():
                 e.setdefault("owners", {})[lid] = tname
                 lname.setdefault(lid, {}).setdefault(tname, {})[n] = e
                 R.setdefault("resolved", {}).setdefault(lid, {}).setdefault(tname, []).append(e["key"])
-    advd = cached("adv", 21600, lambda: ADV.build_adv(norm)); extra = {}
-    cur = int(meta.get("weekly", {}).get("week") or 1)
     try: attach_projections(players, R, cur, lname)
     except Exception as ex: STATUS["projections"] = {"ok": False, "error": str(ex)[:200], "fetched": _stamp()}
     else: STATUS["fp_proj"] = {"ok": True, "fetched": _stamp(), **FPP.status(cur)}
-    if advd:
-        for e in players.values():
-            a = advd["players"].get(norm(e["name"]) + "|" + str(e["pos"]))
-            if a: e["adv"] = a
-        sched = cached("sched", public_ttl(), lambda: ADV.schedule(cur))
-        extra = {"team_stats": advd["teams"], "adv_season": advd["season"], "adv_thru": advd["thru_week"], "fpa": advd["fpa"]}
-        if sched:
-            extra["sched"] = sched; extra["sos"] = ADV.sos(sched, advd["fpa"], cur)
-    return {**extra, "cur_week": cur, "players": list(players.values()), "meta": meta, "rosters": R, "unmatched": unmatched,
-            "rt_as_of": rt["as_of"], "status": STATUS, "built": time.time()}
+    return {**B["extra"], "cur_week": cur, "players": list(players.values()), "meta": meta, "rosters": R, "unmatched": unmatched,
+            "rt_as_of": B["rt_as_of"], "status": {k: v for k, v in STATUS.items()}, "built": time.time()}
+
+# ---------------------------------------------------------------------------
+# Leagues per user. The browser keeps its own list (localStorage) and sends it on every
+# request in the X-Leagues header: [{"id": leagueId, "tid": teamId, "season": 2026, "tok": "..."}].
+#   - public league: read from ESPN with NO cookies
+#   - private league: "tok" is the sealed cookie token from /api/connect (vault.py), only for that league
+#   - Logan's own WAN/SLOPE: server env ESPN_S2/ESPN_SWID, only when the request carries his GM PIN
+# Nothing here writes to ESPN.
+# ---------------------------------------------------------------------------
+MAX_LEAGUES = 8
+FRIEND_TTL = 180          # seconds a friend's league data is shared before ESPN is asked again
+ERR_TTL = 60              # remember "private"/"not found" briefly so bad IDs don't hammer ESPN
+_lg_cache, _lg_locks = {}, {}
+
+def _owner():
+    """True only when the request carries Logan's valid GM PIN. No header = friend (no failure counted)."""
+    if not (request.headers.get("X-GM-Pin") or "").strip(): return False
+    return bool(_pin_ok())
+
+def _int(v, lo=1, hi=10**12):
+    try:
+        v = int(str(v).strip())
+        return v if lo <= v <= hi else None
+    except Exception: return None
+
+def _specs():
+    raw = request.headers.get("X-Leagues")
+    if raw is None: return None
+    try: arr = json.loads(raw)
+    except Exception: return []
+    out = []
+    for x in arr if isinstance(arr, list) else []:
+        if not isinstance(x, dict): continue
+        lid, tid, season = _int(x.get("id")), _int(x.get("tid"), 0, 10**6), _int(x.get("season") or ESPN.SEASON, 2018, 2100)
+        if lid and tid is not None and season: out.append({"id": lid, "tid": tid, "season": season, "tok": str(x.get("tok") or "")[:4000] or None})
+    return out[:MAX_LEAGUES]
+
+def make_ctxs(owner=None):
+    """-> list of league contexts {key, lid, tid, season, cookies, ctag, owner_league}."""
+    owner = _owner() if owner is None else owner
+    specs = _specs()
+    if specs is None: specs = [{"id": v[0], "tid": v[1], "season": ESPN.SEASON, "tok": None} for v in ESPN.LEAGUES.values()] if owner else []
+    out, seen = [], set()
+    for sp in specs:
+        mine = next((k for k, v in ESPN.LEAGUES.items() if v == (sp["id"], sp["tid"]) and sp["season"] == ESPN.SEASON), None)
+        if owner and mine and not sp.get("tok"):
+            ck = CARDS._cookies()
+            c = {"key": mine, "lid": sp["id"], "tid": sp["tid"], "season": sp["season"], "cookies": ck, "ctag": "env" if ck else None, "owner_league": True}
+        else:
+            ck, bad = None, False
+            if sp.get("tok"):
+                ck = VAULT.open_token(sp["tok"], sp["id"]); bad = ck is None
+            c = {"key": "L%d_%d" % (sp["id"], sp["tid"]) + ("" if sp["season"] == ESPN.SEASON else "_%d" % sp["season"]),
+                 "lid": sp["id"], "tid": sp["tid"], "season": sp["season"], "cookies": ck,
+                 "ctag": None if bad else (VAULT.tag(sp["tok"]) if ck else "pub"), "owner_league": False, "bad_token": bad}
+        if c["key"] in seen: continue
+        seen.add(c["key"]); out.append(c)
+    return out
+
+def league_raw(lid, season, cookies, ctag, ttl):
+    """Cached raw ESPN league JSON, shared by everyone reading the same league the same way
+    (public, one sealed token, or Logan's env cookies). Errors cached briefly."""
+    key = "%s:%s:%s" % (lid, season, ctag)
+    now = time.time()
+    c = _lg_cache.get(key)
+    if c and now - c[0] < (ERR_TTL if isinstance(c[1], ESPN.LeagueError) else ttl): pass
+    else:
+        lk = _lg_locks.setdefault(key, threading.Lock())
+        with lk:
+            c = _lg_cache.get(key)
+            if not (c and time.time() - c[0] < (ERR_TTL if isinstance(c[1], ESPN.LeagueError) else ttl)):
+                try: v = ESPN.fetch_league(lid, season, cookies)
+                except ESPN.LeagueError as e: v = e
+                except Exception: v = ESPN.LeagueError("espn", "Couldn't reach ESPN")
+                if isinstance(v, ESPN.LeagueError) and c and not isinstance(c[1], ESPN.LeagueError) and v.code == "espn":
+                    v = c[1]          # ESPN hiccup: keep showing the last good copy
+                c = (time.time(), v); _lg_cache[key] = c
+    if isinstance(c[1], ESPN.LeagueError): raise c[1]
+    return c[1]
+
+def _prune():
+    now = time.time()
+    for k, (t, _) in list(_lg_cache.items()):
+        if now - t > 1800: _lg_cache.pop(k, None); _lg_locks.pop(k, None)
+    with _lock:
+        for k in [k for k, (t, _) in _cache.items() if k.startswith("u:") and now - t > 1800]: _cache.pop(k, None)
+
+def team_list(d):
+    members = {m["id"]: ("%s %s" % (m.get("firstName", ""), m.get("lastName", ""))).strip() or m.get("displayName", "") for m in d.get("members", [])}
+    out = []
+    for t in d.get("teams", []):
+        o = (t.get("record") or {}).get("overall") or {}
+        out.append({"id": t["id"], "name": ESPN.tname(t), "abbrev": t.get("abbrev"), "logo": t.get("logo"),
+                    "managers": [members[x] for x in t.get("owners", []) if members.get(x)],
+                    "record": "%d-%d" % (o.get("wins", 0), o.get("losses", 0)) + ("-%d" % o["ties"] if o.get("ties") else "")})
+    st = d.get("settings") or {}
+    return {"id": d.get("id"), "season": d.get("seasonId"), "name": st.get("name") or "ESPN League %s" % d.get("id"),
+            "size": st.get("size") or len(out)}, out
+
+ERR_TEXT = {"private": "This league is private. Connect your ESPN account to load it.",
+            "bad_creds": "Your ESPN connection didn't work for this league (it may have expired). Reconnect ESPN.",
+            "not_found": "We couldn't find that league for this season. Check the league ID or link.",
+            "bad_team": "That team isn't in this league anymore. Pick your team again.",
+            "espn": "ESPN isn't answering right now. Try again in a minute."}
+
+def assemble_R(ctxs):
+    """Rosters dict for these leagues (same shape the app always used) + per-league errors."""
+    rf = None
+    R = {"leagues": {}, "espn": {}, "errors": {}, "resolved": {}, "order": [c["key"] for c in ctxs], "as_of": _stamp()}
+    for c in ctxs:
+        k = c["key"]
+        if c.get("owner_league"):
+            rf = rf or rosters_file()
+            b = rf["leagues"].get(k)
+            L = None
+            if c["ctag"]:
+                try:
+                    d = league_raw(c["lid"], c["season"], c["cookies"], "env", espn_ttl())
+                    L = ESPN.convert(k, d, b, extra=True); L["team_ids"] = {ESPN.tname(t): t["id"] for t in d.get("teams", [])}
+                except Exception: L = None
+            if L: R["espn"][k] = {"live": True}
+            else:
+                L = copy.deepcopy(b); L["source"] = "cached"
+                R["espn"][k] = {"live": False, "reason": "no credentials" if not c["ctag"] else "ESPN error"}
+            L["league_id"], L["my_team_id"], L["short"] = c["lid"], c["tid"], {"WAN": "WAN", "SLOPE": "SLOPE"}.get(k, k)
+            L["display"] = {"WAN": "WAN 2027", "SLOPE": "Slopeside"}.get(k, L.get("name") or k)
+            R["leagues"][k] = L; R["as_of"] = rf.get("last_synced") or R["as_of"]
+            continue
+        if c.get("bad_token"):
+            R["errors"][k] = {"code": "bad_creds", "msg": ERR_TEXT["bad_creds"], "id": c["lid"], "tid": c["tid"]}; continue
+        try:
+            d = league_raw(c["lid"], c["season"], c["cookies"], c["ctag"], FRIEND_TTL)
+            if not any(t.get("id") == c["tid"] for t in d.get("teams", [])): raise ESPN.LeagueError("bad_team")
+            info, _ = team_list(d)
+            L = ESPN.convert(k, d, {"name": info["name"]}, extra=True, myid=c["tid"], me_label=None)
+            L["name"] = info["name"]; L["display"] = info["name"]
+            L["short"] = re.sub(r"[^A-Za-z0-9]", "", "".join(w[0] for w in info["name"].split() if w))[:5].upper() or "LG"
+            L["private"] = bool(c["cookies"]); L["team_ids"] = {ESPN.tname(t): t["id"] for t in d.get("teams", [])}
+            R["leagues"][k] = L; R["espn"][k] = {"live": True}
+        except ESPN.LeagueError as e:
+            R["errors"][k] = {"code": e.code, "msg": ERR_TEXT.get(e.code, ERR_TEXT["espn"]), "id": c["lid"], "tid": c["tid"]}
+    return R
+
+def _ukey(ctxs):
+    return "u:build:" + hashlib.sha256(json.dumps([[c["key"], c["ctag"]] for c in ctxs]).encode()).hexdigest()[:20]
 
 @app.route("/api/data")
 def api_data():
-    return jsonify(cached("build", espn_ttl() if ESPN.creds() else public_ttl(), build) if not request.args.get("refresh") else build())
+    _prune()
+    owner = _owner()
+    ctxs = make_ctxs(owner)
+    if not ctxs:
+        return jsonify({"owner": owner, "need_setup": True, "rosters": {"leagues": {}, "errors": {}, "order": []}, "players": [], "cur_week": (base() or {}).get("cur")})
+    k = _ukey(ctxs)
+    ttl = espn_ttl() if owner else FRIEND_TTL
+    if request.args.get("refresh"):
+        with _lock: _cache.pop(k, None)
+    d = cached(k, ttl, lambda: build_for(ctxs))
+    if d is None: return jsonify({"ok": False, "error": "Still loading player data, try again in a moment."}), 503
+    return jsonify({**d, "owner": owner, "brand": "Logan's Playbook" if owner else "Playbook"})
 
-def _lg():
-    lg = str(request.args.get("lg", "WAN")).upper()
-    return lg if lg in ESPN.LEAGUES else "WAN"
+def _ctx():
+    """League context for ?lg=KEY, only among the leagues this request is allowed to read."""
+    ctxs = make_ctxs()
+    lg = str(request.args.get("lg", "")).strip()
+    c = next((x for x in ctxs if x["key"] == lg), None) or next((x for x in ctxs if x["key"].upper() == lg.upper()), None)
+    return c, ctxs
+
+@app.route("/api/league-teams")
+def api_league_teams():
+    """Team picker. ?id=<leagueId or ESPN league link>&season=2026 ; header X-League-Token for private."""
+    raw = str(request.args.get("id", ""))
+    m = re.search(r"leagueId=(\d+)", raw) or re.fullmatch(r"\s*(\d{1,12})\s*", raw)
+    if not m: return jsonify({"ok": False, "code": "bad_id", "msg": "That doesn't look like an ESPN league link or ID. It's the number after leagueId= in your league's web address."}), 400
+    lid = int(m.group(1))
+    sm = re.search(r"seasonId=(\d{4})", raw)
+    season = _int(request.args.get("season") or (sm.group(1) if sm else ESPN.SEASON), 2018, 2100) or ESPN.SEASON
+    tm = re.search(r"teamId=(\d+)", raw)
+    tok = (request.headers.get("X-League-Token") or "").strip() or None
+    ck = VAULT.open_token(tok, lid) if tok else None
+    if tok and not ck: return jsonify({"ok": False, "code": "bad_creds", "msg": ERR_TEXT["bad_creds"], "id": lid}), 401
+    try: d = league_raw(lid, season, ck, VAULT.tag(tok) if ck else "pub", FRIEND_TTL)
+    except ESPN.LeagueError as e:
+        return jsonify({"ok": False, "code": e.code, "msg": ERR_TEXT.get(e.code, ERR_TEXT["espn"]), "id": lid, "season": season}), 401 if e.code in ("private", "bad_creds") else 404 if e.code == "not_found" else 502
+    info, teams = team_list(d)
+    return jsonify({"ok": True, "league": {**info, "season": season, "private": bool(ck)}, "teams": teams, "team_hint": int(tm.group(1)) if tm else None})
+
+
+@app.route("/api/connect", methods=["POST"])
+def api_connect():
+    """Private league: check the user's espn_s2 + SWID against that one league (a read), then hand back a
+    sealed token. The cookies are never logged, never stored in plain text, never sent back."""
+    now = time.time(); ip = _ip()
+    _cf[ip] = [t for t in _cf[ip] if now - t < 3600]
+    if len(_cf[ip]) >= 15: return jsonify({"ok": False, "code": "slow_down", "msg": "Too many tries. Wait a bit and try again."}), 429
+    b = request.get_json(silent=True) or {}
+    raw = str(b.get("id", ""))
+    m = re.search(r"leagueId=(\d+)", raw) or re.fullmatch(r"\s*(\d{1,12})\s*", raw)
+    s2, swid = VAULT.clean_s2(b.get("espn_s2")), VAULT.clean_swid(b.get("swid"))
+    if not m: return jsonify({"ok": False, "code": "bad_id", "msg": "Add the league link or ID first."}), 400
+    if not s2: return jsonify({"ok": False, "code": "bad_s2", "msg": "That espn_s2 value doesn't look right. It's a long code (over 100 characters). Copy the whole Value."}), 400
+    if not swid: return jsonify({"ok": False, "code": "bad_swid", "msg": "That SWID doesn't look right. It looks like {1A2B3C4D-....} with curly brackets."}), 400
+    lid = int(m.group(1)); season = _int(b.get("season") or ESPN.SEASON, 2018, 2100) or ESPN.SEASON
+    _cf[ip].append(now)
+    tok = VAULT.seal(lid, s2, swid)
+    try: d = league_raw(lid, season, {"espn_s2": s2, "SWID": swid}, VAULT.tag(tok), FRIEND_TTL)
+    except ESPN.LeagueError as e:
+        code = "bad_creds" if e.code in ("private", "bad_creds") else e.code
+        msg = "ESPN didn't accept those codes for this league. Make sure you're signed in to ESPN as a member of this league, then copy both values again." if code == "bad_creds" else ERR_TEXT.get(code, ERR_TEXT["espn"])
+        return jsonify({"ok": False, "code": code, "msg": msg}), 401 if code == "bad_creds" else 404 if code == "not_found" else 502
+    info, teams = team_list(d)
+    return jsonify({"ok": True, "token": tok, "league": {**info, "season": season, "private": True}, "teams": teams})
 
 @app.route("/api/player/<pid>")
 def api_player(pid):
     """ESPN-style player card. Read-only ESPN GETs, cached."""
     try: pid = int(pid)
     except ValueError: return jsonify({"ok": False, "error": "bad id"}), 400
+    ctx, ctxs = _ctx()
     try:
         wk = CARDS.week_now(cached)
-        c = CARDS.card(cached, pid, _lg(), rosters(), wk, CARDS.pro_sched(cached))
+        R = assemble_R([ctx]) if ctx else {"leagues": {}}
+        if ctx and ctx["key"] not in R["leagues"]: ctx = None
+        c = CARDS.card(cached, pid, ctx, R, wk, CARDS.pro_sched(cached))
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)[:160]}), 502
     if not c: return jsonify({"ok": False, "error": "not found"}), 404
@@ -376,9 +602,15 @@ def api_player(pid):
 @app.route("/api/waivers")
 def api_waivers():
     """Live waiver wire for one league: every available player (FA + waivers) with ESPN projections/ownership."""
+    ctx, _ = _ctx()
+    if not ctx: return jsonify({"ok": False, "error": "league not loaded"}), 404
     try:
         wk = CARDS.week_now(cached)
-        return jsonify({"ok": True, **CARDS.waivers(cached, _lg(), rosters(), wk, CARDS.pro_sched(cached))})
+        R = assemble_R([ctx])
+        if ctx["key"] not in R["leagues"]:
+            e = R["errors"].get(ctx["key"]) or {}
+            return jsonify({"ok": False, "error": e.get("msg") or "league not available", "code": e.get("code")}), 401
+        return jsonify({"ok": True, **CARDS.waivers(cached, ctx, R, wk, CARDS.pro_sched(cached))})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)[:160]}), 502
 
@@ -416,14 +648,28 @@ def news():
 @app.route("/api/news")
 def api_news(): return jsonify({"items": list(reversed(news() or [])), "status": STATUS.get("news")})
 
+_last_global = {"t": 0}
 @app.route("/api/refresh", methods=["POST", "GET"])
 def api_refresh():
-    with _lock: _cache.clear()
+    owner = _owner(); ctxs = make_ctxs(owner)
+    # Everyone: drop this user's league copies so the next load re-reads ESPN.
+    for c in ctxs:
+        for k in [k for k in _lg_cache if k.startswith("%s:%s:" % (c["lid"], c["season"]))]:
+            if time.time() - _lg_cache[k][0] > 20: _lg_cache.pop(k, None)
+    with _lock:
+        _cache.pop(_ukey(ctxs), None)
+        for k in [k for k in _cache if k.startswith("u:lpool:") and any(k.startswith("u:lpool:%s:" % c["lid"]) for c in ctxs)]: _cache.pop(k, None)
+    # Shared sources (FantasyPros etc.) are global: only the owner can force them, at most every 5 minutes.
+    if not owner or time.time() - _last_global["t"] < 300:
+        return jsonify({"ok": True, "scope": "leagues", "updated": _stamp()})
+    _last_global["t"] = time.time()
+    with _lock:
+        for k in [k for k in _cache if not k.startswith("u:")]: _cache.pop(k, None)
     for f in ("sleeper_slim.json", "sched.json"):
         fp = os.path.join(BASE, "cache", f)
         if os.path.exists(fp): os.utime(fp, (0, 0))
-    d = build()
-    with _lock: _cache["build"] = (time.time(), d)
+    d = build_base()
+    with _lock: _cache["base"] = (time.time(), d)
     news()
     return jsonify({"ok": True, "updated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "status": STATUS})
 
@@ -433,7 +679,7 @@ def api_status(): return jsonify(STATUS)
 @app.route("/api")
 def api_docs():
     return """<html><body style="background:#0b0f17;color:#e8edf5;font-family:sans-serif;padding:20px;max-width:800px">
-<h1>Logan's Playbook JSON API</h1><p>Nothing here writes to ESPN. ESPN is only ever read.</p>
+<h1>Playbook JSON API</h1><p>Nothing here writes to ESPN. ESPN is only ever read.</p>
 <h3>GET /api/data</h3><p>Everything the app uses. Add <code>?refresh=1</code> to force a blocking rebuild. Otherwise public sources (FantasyPros, FantasyCalc, Sleeper, schedule, news, build) use a 15 min TTL (5 min for scores/news during Thu/Sun/Mon NFL windows). Expired cache is served immediately and refreshed in a background thread. nflverse adv stays ~6 h.</p>
 <ul><li><b>players[]</b>: key, name, pos, team, bye, opp, own (FP avg roster %), wk {rank,pos_rank,pts (FP PPR projection),best,worst,avg,std,grade,delta}, ros {overall,pos_rank,pos_num,...}, rt (RotoTrade seed), fc12/fc16 (FantasyCalc), inj/inj_part/inj_note (Sleeper), adv {g,ppg,tgt_g,ts,ay_g,touch_g,snap,last3[],trend,trend_val,tot{}} (nflverse), cuff (Sleeper depth chart RB2), owners {WAN|SLOPE: team}, <b>fpp</b> (FantasyPros Week PPR projection from FP projection pages; absent = no match), <b>ep</b>/<b>ea</b> {league: ESPN league-scored week projection / actual}, espn_proj (ESPN default PPR, public pool)</li><li><b>rosters.leagues[lg].matchup.proj2</b>: {me,opp: {espn, fp, fp_pre, fp_missing[], n}} starters only; played players count actual points</li>
 <li><b>fpa</b>: {pos:{team:{fpa,rank}}} PPR points allowed per game (rank 32 = most allowed)</li><li><b>sched</b>: {team:{week:"vs OPP"|"@OPP"}} weeks cur..17 from ESPN</li>
@@ -454,7 +700,8 @@ def api_docs():
 #   GM_WEBHOOK_URL  optional: Grok Bot routine webhook URL (instant push)
 #   GM_WEBHOOK_KEY  optional: that routine's key, sent as Authorization: Bearer
 # ---------------------------------------------------------------------------
-import hmac, uuid, collections
+import hmac, uuid, collections, copy
+_cf = collections.defaultdict(list)       # ip -> [ts] of /api/connect tries
 REQ_PATH = os.path.join(BASE, "cache", "requests.jsonl")
 _req_lock = threading.Lock()
 _fails = collections.defaultdict(list)   # ip -> [ts]
@@ -576,6 +823,56 @@ def api_ack(rid):
         r.update({"status": st, "note": str(b.get("note") or "")[:500] or None, "updated": _stamp()})
         _append({"_upd": 1, "id": rid, "status": r["status"], "note": r["note"], "updated": r["updated"]})
     return jsonify({"ok": True, "request": _public(r)})
+
+@app.route("/api/config")
+def api_config():
+    p = COACH.provider()
+    return jsonify({"version": APP_VERSION, "help_email": os.environ.get("HELP_EMAIL", "").strip() or None,
+                    "coach_ai": p["name"] if p else None, "season": ESPN.SEASON})
+
+@app.route("/api/coach", methods=["POST"])
+def api_coach():
+    """Read-only Coach. Body {question, lg, history}. Uses this request's own leagues only."""
+    b = request.get_json(silent=True) or {}
+    q = str(b.get("question") or "").strip()[:500]
+    if not q: return jsonify({"ok": False, "error": "Ask a question first."}), 400
+    if not COACH.user_ok(_ip()): return jsonify({"ok": False, "error": "You've asked a lot this hour. Take a breather and try again soon."}), 429
+    owner = _owner(); ctxs = make_ctxs(owner)
+    lg = str(b.get("lg") or "")
+    if b.get("leagueId") is not None and b.get("teamId") is not None:
+        lg = next((c["key"] for c in ctxs if c["lid"] == _int(b.get("leagueId")) and c["tid"] == _int(b.get("teamId"), 0)), lg)
+    if not ctxs: return jsonify({"ok": False, "error": "Add your ESPN league first."}), 400
+    d = cached(_ukey(ctxs), espn_ttl() if owner else FRIEND_TTL, lambda: build_for(ctxs))
+    if not d: return jsonify({"ok": False, "error": "Still loading data, try again in a moment."}), 503
+    if lg not in d["rosters"]["leagues"]: lg = next(iter(d["rosters"].get("order") or []), None)
+    if lg not in d["rosters"]["leagues"]: return jsonify({"ok": False, "error": "That league isn't loaded."}), 404
+    hist = b.get("history") if isinstance(b.get("history"), list) else []
+    try: out = COACH.answer(q, d, lg, hist[-6:], _ukey(ctxs))
+    except Exception: return jsonify({"ok": False, "error": "Coach hit a snag. Try asking another way."}), 500
+    return jsonify({"ok": True, "league": lg, **out})
+
+FEED_PATH = os.path.join(BASE, "cache", "feedback.jsonl")
+_fb = collections.defaultdict(list)
+@app.route("/api/feedback", methods=["POST"])
+def api_feedback():
+    now = time.time(); ip = _ip()
+    _fb[ip] = [t for t in _fb[ip] if now - t < 3600]
+    if len(_fb[ip]) >= 5: return jsonify({"ok": False, "error": "Thanks! You've sent a few already, try again later."}), 429
+    b = request.get_json(silent=True) or {}
+    msg = str(b.get("message") or "").strip()[:2000]
+    if len(msg) < 3: return jsonify({"ok": False, "error": "Type a message first."}), 400
+    if os.path.exists(FEED_PATH) and os.path.getsize(FEED_PATH) > 2_000_000: return jsonify({"ok": False, "error": "Feedback box is full right now."}), 507
+    _fb[ip].append(now)
+    rec = {"at": _stamp(), "topic": str(b.get("topic") or "")[:40], "message": msg, "contact": str(b.get("contact") or "")[:120],
+           "app": str(b.get("app") or "")[:60]}
+    with open(FEED_PATH, "a") as f: f.write(json.dumps(rec) + "\n")
+    return jsonify({"ok": True})
+
+@app.route("/api/feedback/list")
+def api_feedback_list():
+    if not _token_ok(): return jsonify({"ok": False}), 401
+    out = [json.loads(l) for l in open(FEED_PATH)] if os.path.exists(FEED_PATH) else []
+    return jsonify({"ok": True, "items": out[-200:]})
 
 @app.route("/manifest.json")
 def manifest(): return send_from_directory(app.static_folder,"manifest.json",mimetype="application/manifest+json")

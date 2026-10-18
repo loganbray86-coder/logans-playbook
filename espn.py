@@ -7,7 +7,8 @@ LEAGUES = {"WAN": (1852378966, 6), "SLOPE": (1994000491, 2)}
 URL = ("https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/%d/segments/0/leagues/%d"
        "?view=mTeam&view=mRoster&view=mMatchupScore&view=mStatus&view=mSettings&view=mPendingTransactions")
 POS = {1: "QB", 2: "RB", 3: "WR", 4: "TE", 5: "K", 16: "DST"}
-SLOT = {0: "QB", 2: "RB", 4: "WR", 6: "TE", 23: "FLEX", 16: "DST", 17: "K", 20: "BE", 21: "IR"}
+SLOT = {0: "QB", 2: "RB", 3: "RB/WR", 4: "WR", 5: "WR/TE", 6: "TE", 7: "OP", 23: "FLEX", 16: "DST", 17: "K", 20: "BE", 21: "IR"}
+SLOT_ORDER = [0, 2, 4, 6, 3, 5, 23, 7, 16, 17]
 PRO = {0: "FA", 1: "ATL", 2: "BUF", 3: "CHI", 4: "CIN", 5: "CLE", 6: "DAL", 7: "DEN", 8: "DET", 9: "GB", 10: "TEN",
        11: "IND", 12: "KC", 13: "LV", 14: "LAR", 15: "MIA", 16: "MIN", 17: "NE", 18: "NO", 19: "NYG", 20: "NYJ",
        21: "PHI", 22: "ARI", 23: "PIT", 24: "LAC", 25: "SF", 26: "SEA", 27: "TB", 28: "WSH", 29: "CAR", 30: "JAX",
@@ -18,14 +19,33 @@ def creds():
     s2, swid = os.environ.get("ESPN_S2", "").strip(), os.environ.get("ESPN_SWID", "").strip()
     return (s2, swid) if s2 and swid else None
 
+class LeagueError(RuntimeError):
+    """code: private | not_found | bad_creds | espn. Message never includes cookies or response bodies."""
+    def __init__(self, code, msg=None):
+        super().__init__(msg or code); self.code = code
+
+def http_get(url, cookies=None, timeout=15):
+    """The one place league JSON is requested. GET only. (Tests patch this.)"""
+    return requests.get(url, cookies=cookies, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+                        timeout=timeout, allow_redirects=False)
+
+def fetch_league(lid, season=SEASON, cookies=None):
+    """Read one league. cookies=None means public access (no cookies at all)."""
+    try: r = http_get(URL % (int(season), int(lid)), cookies=cookies)
+    except Exception: raise LeagueError("espn", "Couldn't reach ESPN")
+    if r.status_code in (401, 403):
+        raise LeagueError("bad_creds" if cookies else "private")
+    if r.status_code == 404: raise LeagueError("not_found")
+    if r.status_code != 200: raise LeagueError("espn", "ESPN HTTP %d" % r.status_code)
+    try: d = r.json()
+    except Exception: raise LeagueError("bad_creds" if cookies else "espn", "ESPN returned non-JSON")
+    if not isinstance(d, dict) or not d.get("teams"): raise LeagueError("not_found")
+    return d
+
 def fetch(lid):
     c = creds()
     if not c: raise RuntimeError("ESPN credentials not set")
-    r = requests.get(URL % (SEASON, lid), cookies={"espn_s2": c[0], "SWID": c[1]},
-                     headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"}, timeout=15, allow_redirects=False)
-    if r.status_code != 200: raise RuntimeError("ESPN HTTP %d" % r.status_code)  # never include cookies/body
-    try: return r.json()
-    except Exception: raise RuntimeError("ESPN returned non-JSON (cookies expired?)")
+    return fetch_league(lid, SEASON, {"espn_s2": c[0], "SWID": c[1]})
 
 def tname(t):
     return (t.get("name") or ("%s %s" % (t.get("location", ""), t.get("nickname", ""))).strip() or "Team %s" % t["id"]).strip()
@@ -47,17 +67,18 @@ def _wk_pts(p, period):
         elif s.get("statSourceId") == 0 and (s.get("stats") or v): ac = round(v, 2)
     return pr, ac
 
-def convert(lkey, d, base, extra=False):
+def convert(lkey, d, base, extra=False, myid=None, me_label="Logan"):
     """extra=True (live app only) adds per-player ESPN week projections/actuals and every team's starters.
-    The sync routine calls convert() without it, so data/rosters.json keeps its exact shape."""
-    lid, myid = LEAGUES[lkey]
+    The sync routine calls convert() without it, so data/rosters.json keeps its exact shape.
+    Friends' leagues pass myid (their team) and me_label=None (real manager names, no 'Logan')."""
+    if myid is None: lid, myid = LEAGUES[lkey]
     L = copy.deepcopy(base or {})
     members = {m["id"]: ("%s %s" % (m.get("firstName", ""), m.get("lastName", ""))).strip() or m.get("displayName", "") for m in d.get("members", [])}
     teams, byid, mgrs, players, pids = {}, {}, {}, {}, {}
     period = d.get("scoringPeriodId") or d.get("status", {}).get("currentMatchupPeriod")
     for t in d.get("teams", []):
         n = tname(t); byid[t["id"]] = n
-        mgrs[n] = "Logan" if t["id"] == myid else ", ".join(members.get(o, "") for o in t.get("owners", []) if members.get(o)) 
+        mgrs[n] = me_label if (me_label and t["id"] == myid) else ", ".join(members.get(o, "") for o in t.get("owners", []) if members.get(o)) 
         ents = t.get("roster", {}).get("entries", [])
         lst = []
         for e in ents:
@@ -67,9 +88,8 @@ def convert(lkey, d, base, extra=False):
         teams[t["id"]] = lst
     me = teams.get(myid, [])
     sset = d.get("settings", {}).get("rosterSettings", {}).get("lineupSlotCounts", {})
-    order = [0, 2, 4, 6, 23, 16, 17]
     slots = []
-    for s in order:
+    for s in SLOT_ORDER:
         slots += [SLOT[s]] * int(sset.get(str(s), 0) or 0)
     if not slots: slots = L.get("slots", [])
     # Logan's list: starters in slot order, then bench, then IR (frontend reads index order)
@@ -159,6 +179,12 @@ def convert(lkey, d, base, extra=False):
                 pr, ac = _wk_pts(p, period)
                 wkp[nm] = {"e": pr, "a": ac, "t": PRO.get(p.get("proTeamId"), "FA")}
         L["wkp"] = wkp; L["starters"] = starters; L["wkp_period"] = period
+    if extra:
+        st_ = d.get("settings", {}) or {}
+        rec = next((x.get("points") for x in (st_.get("scoringSettings", {}) or {}).get("scoringItems", []) if x.get("statId") == 53), None)
+        L["scoring"] = "PPR" if rec == 1 else "Half PPR" if rec == 0.5 else "Standard" if rec in (0, None) else "%g PPR" % rec
+        if st_.get("name"): L["espn_name"] = st_["name"]
+        L["my_team_id"] = myid; L["league_id"] = d.get("id")
     L["source"] = "espn"
     return L
 
