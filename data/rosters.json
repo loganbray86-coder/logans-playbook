@@ -312,7 +312,7 @@
     "me_proj": 103.9,
     "opp_proj": 92.6,
     "week": 6,
-    "as_of": "2026-10-18 07:07 UTC"
+    "as_of": "2026-10-18 07:20 UTC"
    },
    "untouchable": [
     "Breece Hall",
@@ -486,7 +486,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 07:07 UTC",
+   "last_synced": "2026-10-18 07:20 UTC",
    "pids": {
     "CeeDee Lamb": 4241389,
     "Omarion Hampton": 4685382,
@@ -706,7 +706,7 @@
     "process_hour": 11,
     "waiver_hours": 24,
     "order_type": false,
-    "last_run": 1792223132601,
+    "last_run": 1792307471456,
     "order": [
      {
       "team": "Kahbillz",
@@ -1160,7 +1160,7 @@
     "me_proj": 110.0,
     "opp_proj": 131.3,
     "week": 6,
-    "as_of": "2026-10-18 07:07 UTC"
+    "as_of": "2026-10-18 07:20 UTC"
    },
    "pending": [],
    "lineup": [
@@ -1351,7 +1351,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 07:07 UTC",
+   "last_synced": "2026-10-18 07:20 UTC",
    "pids": {
     "Christian McCaffrey": 3117251,
     "Trey McBride": 4361307,
@@ -1639,7 +1639,7 @@
     "process_hour": 11,
     "waiver_hours": 24,
     "order_type": false,
-    "last_run": 1792222916634,
+    "last_run": 1792307724925,
     "order": [
      {
       "team": "Ian's Inspiring Team",
@@ -1711,5 +1711,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 07:07 UTC"
+ "last_synced": "2026-10-18 07:20 UTC"
 }
