@@ -277,7 +277,7 @@
     "Mike Evans": "Q",
     "Quinshon Judkins": "O",
     "Rashee Rice": "O",
-    "Romeo Doubs": "O",
+    "Romeo Doubs": "Q",
     "Saquon Barkley": "O",
     "Stefon Diggs": "Q",
     "Tank Dell": "IR",
@@ -1110,9 +1110,9 @@
     "Pat Bryant": "IR",
     "Quinshon Judkins": "O",
     "Rashee Rice": "O",
-    "Rashod Bateman": "O",
+    "Rashod Bateman": "Q",
     "Roman Wilson": "IR",
-    "Romeo Doubs": "O",
+    "Romeo Doubs": "Q",
     "Saquon Barkley": "O",
     "Stefon Diggs": "Q",
     "T.J. Hockenson": "Q",
@@ -1689,5 +1689,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-10-18",
- "last_synced": "2026-10-18 20:04 UTC"
+ "last_synced": "2026-10-18 20:16 UTC"
 }
