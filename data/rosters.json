@@ -273,7 +273,7 @@
     "Jordan Addison": "Q",
     "Jordan Mason": "IR",
     "Kyle Monangai": "O",
-    "Ladd McConkey": "O",
+    "Ladd McConkey": "Q",
     "Lamar Jackson": "O",
     "Michael Pittman Jr.": "IR",
     "Mike Evans": "Q",
@@ -474,7 +474,7 @@
     }
    ],
    "pending": [],
-   "last_synced": "2026-10-18 19:28 UTC",
+   "last_synced": "2026-10-19 02:34 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1108,7 +1108,7 @@
     "Jordan Mason": "IR",
     "Jordyn Tyson": "IR",
     "Kyle Monangai": "O",
-    "Ladd McConkey": "O",
+    "Ladd McConkey": "Q",
     "Lamar Jackson": "O",
     "Michael Pittman Jr.": "IR",
     "Mike Evans": "Q",
@@ -1334,7 +1334,7 @@
      "rank": 16
     }
    ],
-   "last_synced": "2026-10-18 19:36 UTC",
+   "last_synced": "2026-10-19 02:34 UTC",
    "pids": {
     "A.J. Brown": 4047646,
     "Aaron Jones Sr.": 3042519,
@@ -1693,6 +1693,6 @@
   }
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
- "as_of": "2026-10-18",
- "last_synced": "2026-10-18 22:36 UTC"
+ "as_of": "2026-10-19",
+ "last_synced": "2026-10-19 02:34 UTC"
 }
