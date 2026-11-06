@@ -69,7 +69,7 @@
     "Tyler Loop": "IR"
    },
    "ir": [],
-   "last_synced": "2026-11-06 04:41 UTC",
+   "last_synced": "2026-11-06 04:42 UTC",
    "lineup": [
     {
      "player": "Jared Goff",
@@ -88,7 +88,7 @@
      "slot": "WR"
     },
     {
-     "player": null,
+     "player": "Josh Downs",
      "slot": "WR"
     },
     {
@@ -123,9 +123,9 @@
     "the juice is loose": "Wyatt Bray"
    },
    "matchup": {
-    "as_of": "2026-11-06 04:38 UTC",
+    "as_of": "2026-11-06 04:42 UTC",
     "me": 0,
-    "me_proj": 104.0,
+    "me_proj": 112.5,
     "opp": "Saquonda foreva",
     "opp_proj": 118.6,
     "opp_score": 0,
@@ -555,7 +555,7 @@
      "Chase Brown",
      "Ollie Gordon II",
      "Rome Odunze",
-     "(empty)",
+     "Josh Downs",
      "Tucker Kraft",
      "Woody Marks",
      "DST:SEA",
@@ -564,7 +564,6 @@
      "Breece Hall",
      "Mike Evans",
      "Wan'Dale Robinson",
-     "Josh Downs",
      "Braelon Allen",
      "Germie Bernard",
      "T.J. Hockenson"
@@ -826,7 +825,7 @@
    "ir": [
     "Jordyn Tyson"
    ],
-   "last_synced": "2026-11-06 04:41 UTC",
+   "last_synced": "2026-11-06 04:42 UTC",
    "lineup": [
     {
      "player": "Matthew Stafford",
@@ -888,7 +887,7 @@
     "T1tties": "Thomas Williams"
    },
    "matchup": {
-    "as_of": "2026-11-06 04:38 UTC",
+    "as_of": "2026-11-06 04:42 UTC",
     "me": 10.5,
     "me_proj": 120.9,
     "opp": "Purdy fly for a white guy",
@@ -1720,5 +1719,5 @@
  },
  "_help": "Add other teams under leagues.X.teams as \"Team Name\": [player names]. Use DST:ABBR for defenses and K:Lastname for kickers if unsure of first name. League Analyzer power-ranks every team listed here.",
  "as_of": "2026-11-06",
- "last_synced": "2026-11-06 04:41 UTC"
+ "last_synced": "2026-11-06 04:42 UTC"
 }
